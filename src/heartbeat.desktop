@@ -21,3 +21,4 @@ Exec=/sbin/yast2 heartbeat
 
 Name=High Availability
 GenericName=Configure high availability (heartbeat)
+X-KDE-SubstituteUID=true
