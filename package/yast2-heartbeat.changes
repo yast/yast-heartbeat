@@ -1,5 +1,11 @@
 -------------------------------------------------------------------
-Fri Jun  4 13:59:59 CEST 2004 - gizo@suse.cz
+Thu Jun 17 10:26:01 CEST 2004 - mlazar@suse.cz
+
+- V 2.10.0
+- Merged the 9.1 branch
+
+-------------------------------------------------------------------
+Fri Jun  4 13:59:59 CEST 2004 - mlazar@suse.cz
 
 - fixed bug 41579 (Strange error Message when starting heartbeat) 
 
