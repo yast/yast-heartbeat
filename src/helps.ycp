@@ -1,0 +1,186 @@
+/**
+ * Package:	Configuration of heartbeat
+ * Authors:	Martin Lazar <mlazar@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "heartbeat";
+
+/**
+ * All helps are here
+ */
+map HELPS = $[
+
+    "read" : _("<p><b><big>Initializing Heartbeat Configuration</big></b><br>
+Please wait...<br></p>
+") + _("<p><b><big>Aborting Initialization:</big></b><br>
+Safely abort the configuration utility by pressing <b>Abort</b> now.</p>
+"),
+
+    "write" : _("<p><b><big>Saving Heartbeat Configuration</big></b><br>
+Please wait...<br></p>
+") + _("<p><b><big>Aborting Saving:</big></b><br>
+Abort the save procedure by pressing <b>Abort</b>.
+An additional dialog informs whether it is safe to do so.
+</p>
+"),
+
+    "node_conf" : _("<p><b>Node Configuration</b> allows configuration of the
+node names of the two nodes in the cluster -- this one and its
+peer -- without a domain name appended.</p>
+") + 
+    _("<p>The names specified here should match the output of
+<i>uname -n</i> on each node.</p>"),
+    
+    "media_conf" : _("<p>In <b>Media Configuration</b>, specify the
+interconnects Heartbeat should use for its internal control
+and liveness messages. It is <b>strongly</b>
+recommended to specify more than one media for redundancy reasons.</p>
+") +
+    _("<p>Choose at least one <b>Heartbeat Medium</b>. At least two independent
+ones are strongly recommended.</p>
+") +
+    _("<p>If specifying a <b>Serial Port</b>, provide the correct
+device file name of the port connected to the peer node via a null-modem
+cable.</p>") +
+    _("<p>For a <b>broadcast</b> medium, choose one of the available network
+devices.</p>
+") +
+    _("<p>For a <b>unicast</b> medium, provide both the IP address of the peer
+to use and the network interface.</p>") +
+    _("<p>For a <b>multicast</b> medium, choose network device, multicast
+group to join (class D multicast address 224.0.0.0 - 239.255.255.255) and
+the ttl value (1-255).</p>") +
+    _("<p>The <b>UDP port</b> sets the UDP port used for the unicast and
+broadcast media. Leave this at the default value (694)
+unless you are running multiple Heartbeat clusters over the same network
+segment, in which case you need to run each of them on a different port
+number.</p>
+") +
+    _("<p>The <b>Baud Rate</b> controls the speed of the serial port if you are
+using a serial media. It is global for all serial
+interconnects.</p>
+"),
+    
+    "auth_conf" : _("<p>Specify the <b>authentication method</b> to use for the network
+communication. This is very important to protect against network
+attacks.</p>
+") +
+    _("<p>Both <b>md5</b> and <b>sha1</b> require a <i>shared
+secret</i>, which is used to protect and authenticate the messages. The
+<b>crc</b> mechanism does <b>not</b> do message authentication and 
+only protects against corruption, not against attacks.</p>
+") +
+    _("<p>It is recommended to choose the <b>sha1</b> method, which is the
+    strongest authentication scheme available, and an appropriately strong
+    password. This must be exactly the same on all cluster
+    members.</p>
+"),
+    
+    "resources_conf" : _("<p><b>Resources</b> -- specify which resources are handled by Heartbeat
+and how Heartbeat should handle failback (migration of resources back to
+a node after a failure has been resolved).</p>
+") +
+    _("<p>If you set <b>Automatic Failback</b> to <i>on</i>, Heartbeat 
+migrates resources back to the primary owner as soon as it becomes
+available again. This automatically restores the balancing of
+resources between the nodes, but requires that the resources are briefly
+stopped so they can be cleanly started, leading to a minor
+interruption of service.</p>
+") +
+    _("<p>For most scenarios, <i>off</i> is the correct choice. It requires 
+the administrator to trigger the failback of resources manually
+(using the hb_standby command line tool) as soon as the failure is
+resolved. This allows him to schedule a maintenance window and not
+interrupt the service even more.</p>
+") +
+    _("<p><i>legacy</i> is the old default for compatibility with former
+Heartbeat releases. It activates the automatic failback if not all
+nodes support the new directive yet. Explicitly choosing either 
+<i>on</i> or <i>off</i> is recommended for new deployments.</p>
+") +
+    _("<p>Adding a resource to a given node places the resource under
+Heartbeat's control. It will be started and stopped automatically by
+Heartbeat. Make sure the resource is not started by anything
+else.</p>
+") +
+    _("<p>Heartbeat primarily starts the resource on the node to which it is
+assigned if both nodes are healthy and up. See the <b>auto_failback</b>
+setting above.</p>
+") +
+    _("<p>Specify any init script name as a resource or a specify a special 
+Heartbeat resource script (provided in the <i>/etc/ha.d/resource.d</i>
+directory). Some of the latter take additional arguments, which are
+separated from the resource script name itself by <i>::</i>, for
+example, <i>Filesystem::/dev/sda1::/mnt::reiserfs</i>. Check the
+documentation for the resource scripts.</p>
+"),
+    
+    "stonith_conf" : _("<p>To protect the shared data, <b>STONITH</b> must be configured.
+Heartbeat is capable of driving a number of serial and network
+power switches to prevent a potentially faulty node from corrupting the
+shared data.</p>
+") +
+    _("<p>It needs to know which node can access the power switch. For a serial
+power switch, this is a specific node name. For a network power
+switch, typically enter a '*' to indicate that it is accessible from all
+nodes.</p>
+") +
+    _("<p>The <b>STONITH Type</b> must match the module name capable of
+controlling the power switch used.  The <b>Parameters</b>
+are also specific to the module. See the <i>stonith -h</i>
+command line tool for a listing of the supported modules and the
+parameters they accept.</p>
+"),
+
+    "startup_conf" : _("<p><b><big>Booting</big></b><br>
+To start the Heartbeat server every time your computer is booted, set
+<b>On</b>. Otherwise set <b>Off</b>.</p>") +
+    _("<p><b><big>Switch On or Off</big></b><br>
+To start or stop the Heartbeat server immediately, use <b>Start Heartbeat
+Server Now</b> or <b>Stop Heartbeat Server Now</b>.</p>"),
+
+    "timeouts_conf": _("<p>Heartbeat uses a variety of timers to tune and configure its behavior.
+All timers are specified in seconds.</p>
+") +
+    _("<p><b>Keep Alive</b> specifies the interval at which a node announces itself on
+the network.</p>
+") +
+    _("<p><b>Dead Time</b> is the time after which a node is presumed to be dead.
+It should probably default to five times the Keep Alive interval.</p>
+") +
+    _("<p><b>Warn Time</b> is the time after which Heartbeat warns in the log files
+that a node has been slow in sending its heartbeats. This should
+probably default to three times the Keep Alive interval.</p>
+") +
+    _("<p><b>Init Dead Time</b> is the time a node waits after start-up for the other
+nodes, given that sometimes network interfaces, routing, etc., take a
+while to stabilize. It should default to at least twice the Dead Time.</p>
+") +
+    _("If the <b>Watchdog Timer</b> is enabled, Heartbeat uses
+the in-kernel watchdog for monitoring the local node itself. If
+Heartbeat does not write to that file every sixty seconds, the kernel 
+forcibly reboots the node.</p>
+"),
+
+    "ipfail_conf": _("<p><b>IP Fail</b> allows monitoring of external
+hosts and moving the resources accordingly (i.e., to the host with the
+<i>best</i> connectivity).</p>
+") +
+    _("<p>If enabled, Heartbeat needs a <b>Ping List</b> of external nodes to ping.
+The minimum if IP fail is enabled is one. A maximum of four to eight nodes seems sensible.</p>
+") +
+    _("<p>For more complex configurations, Heartbeat also supports <i>Ping Groups</i>."),
+    
+    "group_conf": _("A list of IP addresses is grouped together and if any
+of them is reachable, the node is deemed able to communicate with
+the <i>Ping Group</i>.</p>
+")
+
+];
+
+/* EOF */
+}

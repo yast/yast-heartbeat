@@ -1,0 +1,95 @@
+/**
+ * Package:	Configuration of heartbeat
+ * Authors:	Martin Lazar <mlazar@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+textdomain "heartbeat";
+
+import "Label";
+import "Wizard";
+import "Heartbeat";
+import "Report";
+import "SCR";
+
+include "heartbeat/helps.ycp";
+include "heartbeat/common.ycp";
+
+
+any log_conf_Read()
+{
+    return true;
+}
+
+boolean log_conf_Write()
+{
+    return true;
+}
+    
+term timeouts_conf_getDialog()
+{
+    list watchdogs = [ Heartbeat::config["watchdog"]:"/dev/watchdog" ];
+    watchdogs = union(watchdogs, ["/dev/watchdog"]);
+    
+    return `VBox(
+	`IntField(`id("keepalive"), _("Keep Alive"), 1, 1000, tointeger(Heartbeat::config["keepalive"]:"2")),
+	`VSpacing(1),
+	`IntField(`id("deadtime"), _("Dead Time"), 1, 1000, tointeger(Heartbeat::config["deadtime"]:"30")),
+	`VSpacing(1),
+	`IntField(`id("warntime"), _("Warn Time"), 1, 1000, tointeger(Heartbeat::config["warntime"]:"10")),
+	`VSpacing(1),
+	`IntField(`id("initdead"), _("Init Dead Time"), 1, 1000, tointeger(Heartbeat::config["initdead"]:"120")),
+	`VSpacing(1),
+	`Frame(_("Watchdog Timer"), `HBox(
+	    `RadioButtonGroup(`id("watchdog_enable"), `VBox(
+		`RadioButton(_("Enable")),
+		`RadioButton(_("Disable")))),
+	    `ComboBox(`id("watchdog_device"), `opt(`editable), _("Watchdog Device"), watchdogs ))));
+}
+
+any ConfigureTimeoutsDialog () {
+
+    timeouts_conf_Read();
+    
+    my_SetContents("timeouts_conf", timeouts_conf_getDialog());
+    
+    any ret = nil;
+    while(true) {
+    
+	Wizard::SelectTreeItem("timeouts_conf");
+
+	ret = UI::UserInput();
+
+        if (ret == `abort || ret == `cancel) {
+	    if (ReallyAbort()) return ret;
+	    else continue;
+	}
+
+	if (ret == `help) {
+	    myHelp("timeouts_conf");
+	    continue;
+	}
+
+	if (ret == `wizardTree)
+	    ret = (string)UI::QueryWidget (`id (`wizardTree), `CurrentItem);
+
+	if (ret == `next || ret == `back || contains(DIALOG, (string)ret)) {
+	
+	    if (!timeouts_conf_Write()) continue;
+	    
+	    if (ret != `next && ret != `back)
+		ret = symbolof(toterm(ret));
+
+	    break;
+	}
+
+	y2error("unexpected retcode: %1", ret);
+    }
+
+    return ret;
+}
+
+/* EOF */
+}

@@ -1,0 +1,402 @@
+/**
+ * Package:	Configuration of heartbeat
+ * Authors:	Martin Lazar <mlazar@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+textdomain "heartbeat";
+
+import "Label";
+import "Wizard";
+import "Heartbeat";
+import "Report";
+import "SCR";
+
+include "heartbeat/helps.ycp";
+include "heartbeat/common.ycp";
+
+string ipfail_re = "\/heartbeat\/ipfail$";
+
+map ipfail_conf_Read()
+{
+    map f = $[];
+    
+    list<string> respawn = Heartbeat::config["respawn"]:[];
+    f["enab"] = false;
+    foreach(string s, respawn, { if (regexpmatch(s, ipfail_re)) f["enab"] = true; });
+    
+    f["ping"] = Heartbeat::config["ping"]:[];
+    
+    return f;
+}
+
+boolean ipfail_conf_Write(map old, map new)
+{
+    if (old["enab"]:true != new["enab"]:true) {
+	Heartbeat::config["modified"] = true;
+	list<string> respawn = Heartbeat::config["respawn"]:[];
+	respawn = filter(string s, respawn, {return !regexpmatch(s, ipfail_re); });
+	if (new["enab"]:true) {
+	    map unamemap = (map)SCR::Execute(.target.bash_output, "uname -m");
+	    string machine = deletechars(unamemap["stdout"]:"", "\n");
+	    if (machine == "x86_64") {
+		respawn = add(respawn, "hacluster /usr/lib64/heartbeat/ipfail");
+	    } else {
+		respawn = add(respawn, "hacluster /usr/lib/heartbeat/ipfail");
+	    }
+	}
+	Heartbeat::config["respawn"] = respawn;
+    }
+    
+    boolean same = true;
+    if (size(old["ping"]:[]) != size(new["ping"]:[])) {
+	same = false;
+    } else {
+	integer i = size(new["ping"]:[]);
+	while (i>=0 && old["ping",i]:"" == new["ping",i]:"") i = i-1;
+	if (i>=0) same = false;
+    }
+    if (!same) {
+	Heartbeat::config["modified"] = true;
+	Heartbeat::config["ping"] = new["ping"]:[];
+    }
+    
+    return true;
+}
+
+any ipfail_conf_updatePingList(list l, string selected)
+{
+    UI::ReplaceWidget(`id("ping_list_rp"), `SelectionBox(`id("ping_list"), _("Node List"), l));
+    if (size(l)>0 && selected != "" && selected != nil && contains(l, selected)) {
+	UI::ChangeWidget(`id("ping_list"), `CurrentItem, selected);
+    }
+}
+    
+any ipfail_conf_SetDialog(map f)
+{
+    
+//    term TEnab = `Left(`CheckBox(`id("enable"), _("Enable IP Fail")));
+    term TEnab = `Left(`RadioButtonGroup(`id("enab"), `HBox(
+	`RadioButton(`id("enable"), _("Enable"), f["enab"]:true),
+	`RadioButton(`id("disable"), _("Disable"), !(f["enab"]:true)))));
+	
+    term TPing = `VBox(
+	`VSquash(`HBox(
+	    `HWeight(9, `Frame(_("Ping to Node"), `HBox(
+		`TextEntry(`id("ping_ip"), _("IP Address"))))),
+	    `HWeight(2, `VBox(
+		`VStretch(),
+		`PushButton(`id("ping_add"), `opt(`hstretch), Label::AddButton()))))),
+	`VSpacing(0.5),
+	`HBox(
+	    `HWeight(9,
+		`ReplacePoint(`id("ping_list_rp"), `Empty())),
+	    `HWeight(2, `VBox(
+		`VSpacing(1),
+		`PushButton(`id("ping_del"), `opt(`hstretch), Label::DeleteButton()),
+		`VStretch()))));
+	
+    term contents = `VBox(`VSquash(TEnab), `VSpacing(1), TPing);
+    
+    my_SetContents("ipfail_conf", contents);
+    
+    ipfail_conf_updatePingList(f["ping"]:[], f["ping",0]:"");
+
+}
+
+any ipfail_conf_UpdateDialog(map f)
+{
+    UI::ChangeWidget(`id("ping_del"), `Enabled, size(f["ping"]:[])>0);
+}
+
+map ipfail_conf_Current(map old)
+{
+    map f = $[];
+    
+    f["enab"] = "enable" == (string)UI::QueryWidget(`id("enab"), `CurrentButton);
+    f["ping"] = old["ping"]:[];
+    return f;
+}
+
+any ConfigureIpfailDialog () {
+
+    map old = ipfail_conf_Read();
+    map cur = old;
+
+    ipfail_conf_SetDialog(old);    
+    
+    any ret = nil;
+    while(true) {
+    
+	Wizard::SelectTreeItem("ipfail_conf");
+
+	ipfail_conf_UpdateDialog(cur);
+
+	ret = UI::UserInput();
+
+	cur = ipfail_conf_Current(cur);
+	
+	if (ret == "ping_del") {
+	    string sel = (string)UI::QueryWidget(`id("ping_list"), `CurrentItem);
+	    cur["ping"] = filter(string s, cur["ping"]:[], { return (s != sel); });
+	    ipfail_conf_updatePingList(cur["ping"]:[], cur["ping",0]:"");
+	    continue;
+	}
+
+	if (ret == "ping_add") {
+	    string ip = (string)UI::QueryWidget(`id("ping_ip"), `Value);
+	    if (! IP::Check4(ip)) {
+		Report::Error (IP::Valid4 ());
+	        continue;
+	    }
+	    if (contains(cur["ping"]:[], ip)) {
+		Report::Error( _("Specified IP address is already present."));
+		continue;
+	    }
+	    cur["ping"] = add(cur["ping"]:[], ip);
+	    ipfail_conf_updatePingList(cur["ping"]:[], ip);
+	    continue;
+	}
+
+        if (ret == `abort || ret == `cancel) {
+	    if (ReallyAbort()) return ret;
+	    else continue;
+	}
+
+	if (ret == `help) {
+	    myHelp("ipfails_conf");
+	    continue;
+	}
+
+	if (ret == `next || ret == `back || ret == `wizardTree || contains(DIALOG, tostring(ret))) {
+	
+	    if (!ipfail_conf_Write(old, cur)) continue;
+	    
+	    if (ret == `wizardTree)
+	        ret = (string)UI::QueryWidget (`id (`wizardTree), `CurrentItem);
+		
+	    if (ret != `next && ret != `back)
+		ret = symbolof(toterm(ret));
+
+	    break;
+	}
+
+	y2error("unexpected retcode: %1", ret);
+    }
+
+    return ret;
+}
+
+
+// ping group configuration
+
+map group_conf_Read()
+{
+    map g = $[];
+    
+    foreach(string s, Heartbeat::config["ping_group"]:[], {
+	list l = splitstring(s, " \t");
+	string name = l[0]:"";
+	if (name != "") {
+	    g[name] = remove(l, 0);
+	}
+    });
+    
+    return g;
+}
+
+boolean group_conf_Write(map old, map new)
+{
+    boolean same = true;
+    if (size(old) != size(new)) {
+	same = false;
+    } else {
+	foreach(string key, list l, (map<string,list>)old, {
+	    if (same && mergestring((list<string>)l, " ") != mergestring(new[key]:[], " "))
+		same = false;
+	});
+    }
+    
+    if (!same) {
+	Heartbeat::config["modified"] = true;
+	list pg = [];
+	foreach(string key, list l, (map<string,list>)new, {
+	    string s = key;
+	    if (size(l)>0) { s = s + " " + mergestring((list<string>)l, " ");}
+	    pg = add(pg, s);
+	});
+	Heartbeat::config["ping_group"] = pg;
+    }
+    
+    return true;
+}
+
+any group_conf_updateList(map g, string sel)
+{
+    list items = [];
+    
+    foreach(string key, list ip, (map<string,list>) g, {
+	items = add(items, `item(`id(key), key, mergestring((list<string>)ip, " ")));
+    });
+    
+    UI::ChangeWidget(`id("group_list"), `Items, items);
+
+    if (size(g)>0 && sel != "" && sel != nil && haskey(g, sel)) {
+	UI::ChangeWidget(`id("group_list"), `CurrentItem, sel);
+    }
+}
+
+any group_conf_UpdateDialog(map g)
+{
+    UI::ChangeWidget(`id("group_edit"), `Enabled, size(g)>0);
+    UI::ChangeWidget(`id("group_del"), `Enabled, size(g)>0);
+}
+
+map group_conf_Current(map old)
+{
+    return old;
+}
+    
+any group_conf_SetDialog(map g)
+{
+    term contents = `VBox(
+	`VSquash(`HBox(
+	    `HWeight(9, `Frame(_("Ping Group"), `HBox(
+		`HSquash(`TextEntry(`id("group_name"), _("Group Name"))),
+		`HSpacing(1),
+		`TextEntry(`id("group_ip"), _("List of IP Addresses"))))),
+	    `HWeight(2, `VBox(
+		`VStretch(),
+		`PushButton(`id("group_add"), `opt(`hstretch), Label::AddButton()),
+		`PushButton(`id("group_edit"), `opt(`hstretch), Label::EditButton()))))),
+	`VSpacing(0.5),
+	`HBox(
+	    `HWeight(9,
+		`Table(`id("group_list"), `opt(`notify, `immediate), `header(_("Group Name"), _("IP Addresses")))),
+	    `HWeight(2, `VBox(
+		`VSpacing(1),
+		`PushButton(`id("group_del"), `opt(`hstretch), Label::DeleteButton()),
+		`VStretch()))));
+
+    my_SetContents("group_conf", contents);
+    
+    group_conf_updateList(g, nil);
+}
+
+any ConfigurePingGroupDialog () {
+
+    map old = group_conf_Read();
+    map cur = old;
+    
+    group_conf_SetDialog(old);
+    
+    any ret = nil;
+    while(true) {
+    
+	Wizard::SelectTreeItem("group_conf");
+	
+	group_conf_UpdateDialog(cur);
+
+	ret = UI::UserInput();
+	
+	cur = group_conf_Current(cur);
+	
+	if (ret == "group_add") {
+	    string name = (string)UI::QueryWidget(`id("group_name"), `Value);
+	    string iplist = (string)UI::QueryWidget(`id("group_ip"), `Value);
+	    list ip = splitstring(iplist, " \t");
+	    
+	    if (name == "" || name == nil) {
+		Report::Error(_("Group name is required."));
+		continue;
+	    }
+	    
+	    if (haskey(cur, name)) {
+		Report::Error(_("Specified group name is already present."));
+		continue;
+	    }
+	    
+	    boolean ipok = true;
+	    foreach(string s, (list<string>)ip, { if (!IP::Check4(s)) ipok = false; });
+	    if (!ipok) {
+		Report::Error(_("Bad list of IP adresses."));
+		continue;
+	    }
+	    
+	    cur[name] = ip;
+	    group_conf_updateList(cur, name);
+	    continue;
+	}
+
+	if (ret == "group_edit") {
+	    string name = (string)UI::QueryWidget(`id("group_name"), `Value);
+	    string iplist = (string)UI::QueryWidget(`id("group_ip"), `Value);
+	    list ip = splitstring(iplist, " \t");
+	    
+	    if (name == "" || name == nil) {
+		Report::Error(_("Group name is required."));
+		continue;
+	    }
+	    
+	    boolean ipok = true;
+	    foreach(string s, (list<string>)ip, { if (!IP::Check4(s)) ipok = false; });
+	    if (!ipok) {
+		Report::Error(_("Bad list of IP adresses."));
+		continue;
+	    }
+
+	    string key = (string)UI::QueryWidget(`id("group_list"), `CurrentItem);
+	    cur = filter(string s, list l, (map<string,list>)cur, {return (s != key);});
+	    
+	    cur[name] = ip;
+	    group_conf_updateList(cur, name);
+	    continue;
+	}
+
+	if (ret == "group_del") {
+	    string key = (string)UI::QueryWidget(`id("group_list"), `CurrentItem);
+	    cur = filter(string s, list l, (map<string,list>)cur, {return (s != key);});
+	    group_conf_updateList(cur, nil);
+	    continue;
+	}
+	
+	if (ret == "group_list") {
+	    string key = (string)UI::QueryWidget(`id("group_list"), `CurrentItem);
+	    UI::ChangeWidget(`id("group_name"), `Value, key);
+	    UI::ChangeWidget(`id("group_ip"), `Value, mergestring(cur[key]:[], " "));
+	    continue;
+	}
+
+        if (ret == `abort || ret == `cancel) {
+	    if (ReallyAbort()) return ret;
+	    else continue;
+	}
+
+	if (ret == `help) {
+	    myHelp("group_conf");
+	    continue;
+	}
+
+	if (ret == `next || ret == `back || ret == `wizardTree || contains(DIALOG, tostring(ret))) {
+	
+	    if (!group_conf_Write(old, cur)) continue;
+	    
+	    if (ret == `wizardTree)
+	        ret = (string)UI::QueryWidget (`id (`wizardTree), `CurrentItem);
+		
+	    if (ret != `next && ret != `back)
+		ret = symbolof(toterm(ret));
+
+	    break;
+	}
+
+	y2error("unexpected retcode: %1", ret);
+    }
+
+    return ret;
+}
+
+/* EOF */
+}

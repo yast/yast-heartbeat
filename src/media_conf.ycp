@@ -1,0 +1,367 @@
+/**
+ * Package:	Configuration of heartbeat
+ * Authors:	Martin Lazar <mlazar@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "heartbeat";
+
+import "Label";
+import "Wizard";
+import "Heartbeat";
+import "IP";
+
+include "heartbeat/helps.ycp";
+include "heartbeat/common.ycp";
+
+boolean media_warned = false;
+
+map media_Read()
+{
+    map media = $[];
+    media["serial"] = Heartbeat::config["serial"]:[];
+    media["bcast"] = Heartbeat::config["bcast"]:[];
+    media["ucast"] = Heartbeat::config["ucast"]:[];
+    media["mcast"] = Heartbeat::config["mcast"]:[];
+    
+    media["udpport"] = Heartbeat::config["udpport"]:"694";
+    media["baud"] = Heartbeat::config["baud"]:"57600";
+    
+    return media;
+}
+
+boolean media_Write(map old, map new)
+{
+    if (!media_warned) {
+        integer siz = 0;
+	foreach(string key, ["serial", "bcast", "mcast", "ucast"], { siz = siz + size(new[key]:[]); });
+        if (siz<2) {
+	    if (!Popup::ContinueCancel(
+_("Warning: No redundancy in the Heartbeat communication channels.
+Multiple media should be configured to reduce the likelihood of
+critical split brain scenarios.
+")))
+	    {
+		return false;
+	    }
+	    media_warned = true;
+	}
+    }
+    
+    foreach(string cast, ["serial", "bcast", "mcast", "ucast"], {
+	boolean same = true;
+	if (size(old[cast]:[]) != size(new[cast]:[])) {
+	    same = false;
+	} else {
+	    integer i = size(old[cast]:[]);
+	    while(i>=0 && old[cast,i]:"" == new[cast,i]:"") i = i-1;
+	    if (i>=0) same = false;
+	}
+	if (!same) {
+	    Heartbeat::config["modified"] = true;
+	    Heartbeat::config[cast] = new[cast]:[];
+	}
+    });
+    
+    foreach(string x, ["udpport", "baud"], {
+	if (old[x]:"" != new[x]:"") {
+	    Heartbeat::config["modified"] = true;
+	    Heartbeat::config[x] = new[x]:"";
+	}
+    });
+
+    return true;
+}
+
+any media_updateList(map media, string sel)
+{
+    list imedia = [];
+    foreach(string key, ["serial", "bcast", "mcast", "ucast"], {
+        list val = media[key]:[];
+	integer index = -1;
+	list im = maplist(string s, (list<string>)val, { 
+	    index = index + 1; 
+	    return `item(`id(key + "[" + tostring(index) +"]"), key, val[index]:"");
+	});
+	imedia = union(imedia, im);
+    });
+	
+    UI::ChangeWidget(`id("configured_media_table"), `Items, imedia);
+
+    if (size(imedia)>0 && sel != nil && sel != "") {
+        UI::ChangeWidget(`id("configured_media_table"), `CurrentItem, sel);
+    }
+}
+
+any media_SetDialog(map media)
+{
+    list serial_ports = [ "/dev/ttyS0", "/dev/ttyS1", "/dev/ttyS2" ];
+    list net_devices = [ "eth0", "eth1" ];
+    list rates = ["19200", "38400", "57600", "115200"];
+
+    term TPort = `HBox(
+	`HSquash(`Left(`TextEntry(`id("udpport"), _("UDP Port"), media["udpport"]:"694"))),
+	`HSpacing(2),
+	`HSquash(`Left(`ComboBox(`id("baud"), `opt(`editable), _("Baud Rate"), rates))),
+	`HStretch());
+
+    term TRadio = `RadioButtonGroup( `id ("media_type"), `VBox(
+        `Left(`HBox(
+	    `RadioButton( `id ("media_type_serial"), `opt(`notify), _("Serial Port"), true),
+	    `HSpacing(2),
+	    `ComboBox(`id("serial_port"), `opt(`editable), _("Serial Port Name"), serial_ports))),
+	`Left(`HBox(
+	    `RadioButton( `id ("media_type_bcast"), `opt(`notify), _("Broadcast"), false),
+	    `HSpacing(2),
+	    `ComboBox(`id("bcast_device"), `opt(`editable), _("Device"), net_devices))),
+	`Left(`HBox(
+	    `RadioButton(`id("media_type_ucast"), `opt(`notify), _("Unicast"), false),
+	    `HSpacing(2),
+	    `TextEntry(`id("ucast_address"), _("IP Address"), "" ),
+	    `HSpacing(1),
+	    `ComboBox(`id("ucast_device"), `opt(`editable), _("Device"), net_devices))),
+	`Left(`HBox(
+	    `RadioButton(`id("media_type_mcast"), `opt(`notify), _("Multicast"), false),
+	    `HSpacing(2),
+	    `TextEntry(`id("mcast_address"), _("Multicast Group"), "" ),
+	    `HSpacing(1),
+	    `ComboBox(`id("mcast_device"), `opt(`editable), _("Device"), net_devices),
+	    `HSpacing(1),
+	    `IntField(`id("ttl"), _("TTL"), 1, 255, 2),
+	    `HStretch()))));
+	    
+    term TAdd =	`VSquash(`HBox(
+	`HWeight( 9, `Frame(_("Heartbeat Medium"), TRadio)),
+	`HWeight( 2, `VBox(
+	    `VStretch(),
+	    `PushButton(`id("add_media"), `opt(`hstretch), Label::AddButton()),
+	    `VSpacing(1),
+	    `PushButton(`id("edit_media"), `opt(`hstretch), Label::EditButton())))));
+
+    term TList = `HBox(
+	`HWeight( 9,
+	    `Table(`id("configured_media_table"), `opt(`notify, `immediate),
+		`header(_("Medium"), _("Options")))),
+	`HWeight( 2, `VBox( 
+	    `VSpacing(1),
+	    `PushButton(`id("delete_media"), `opt(`hstretch), Label::DeleteButton()),
+	    `VStretch())));
+	    
+    term contents = `VBox(TAdd, `VSpacing(0.5), TList, TPort);
+
+    my_SetContents("media_conf",contents);
+
+    UI::ChangeWidget(`id("udpport"), `ValidChars, "0123456789");
+    UI::ChangeWidget(`id("baud"), `ValidChars, "0123456789");
+    UI::ChangeWidget(`id("baud"), `Value, media["baud"]:"57600");
+    
+    media_updateList(media, nil);
+}
+
+any media_UpdateDialog(map media)
+{
+    boolean media_non_empty = size (media["bcast"]:[]) > 0
+	|| size (media["mcast"]:[])>0
+	|| size (media["serial"]:[])>0
+	|| size (media["ucast"]:[])>0;
+	
+    UI::ChangeWidget(`id("delete_media"), `Enabled, media_non_empty);
+    UI::ChangeWidget(`id("edit_media"), `Enabled, media_non_empty);
+
+    string type = (string)UI::QueryWidget(`id("media_type"), `CurrentButton);
+    
+    UI::ChangeWidget(`id("serial_port"), `Enabled, type == "media_type_serial");
+    
+    UI::ChangeWidget(`id("bcast_device"), `Enabled, type == "media_type_bcast");
+
+    UI::ChangeWidget(`id("ucast_device"), `Enabled, type == "media_type_ucast");
+    UI::ChangeWidget(`id("ucast_address"), `Enabled, type == "media_type_ucast");
+
+    UI::ChangeWidget(`id("mcast_device"), `Enabled, type == "media_type_mcast");
+    UI::ChangeWidget(`id("mcast_address"), `Enabled, type == "media_type_mcast");
+    UI::ChangeWidget(`id("ttl"), `Enabled, type == "media_type_mcast");
+}
+
+map media_Current(map old)
+{
+    map new = old;
+    
+    new["udpport"] = (string)UI::QueryWidget(`id("udpport"), `Value);
+    new["baud"] = (string)UI::QueryWidget(`id("baud"), `Value);
+    return new;
+}
+
+any media_already()
+{
+    Report::Error(_("Specified media is already present."));
+}
+
+map media_delete(map cur, boolean edit)
+{
+    string curid = (string)UI::QueryWidget(`id("configured_media_table"), `CurrentItem);
+    list l = regexptokenize(curid, "([a-z]*).([0-9]*)");
+    integer i = tointeger(l[1]:"0");
+    string medname = l[0]:"";
+    cur[medname] = remove(cur[medname]:[], i);
+    
+    if (!edit)
+	media_updateList(cur, nil);
+	
+    return cur;
+}
+
+map media_add(map cur, boolean edit)
+{
+    string mn = (string)UI::QueryWidget(`id("media_type"), `CurrentButton);
+    string all = "";
+    if (mn=="media_type_serial") {
+	all = (string)UI::QueryWidget(`id("serial_port"), `Value);
+	if (!edit && contains(cur["serial"]:[], all)) {
+	    media_already();
+	    return cur;
+	}
+	cur["serial"] = add(cur["serial"]:[], all);
+    } else if (mn=="media_type_bcast") {
+	all = (string)UI::QueryWidget(`id("bcast_device"), `Value);
+	if (!edit && contains(cur["bcast"]:[], all)) {
+	    media_already();
+	    return cur;
+	}
+	cur["bcast"] = add(cur["bcast"]:[], all);
+    } else if (mn=="media_type_ucast") {
+	string dev = (string)UI::QueryWidget(`id("ucast_device"), `Value);
+	string address = (string)UI::QueryWidget(`id("ucast_address"), `Value);
+	if (! IP::Check4(address)) {
+	    Report::Error (IP::Valid4 ());
+	    return cur;
+	}
+	string all = dev + " " + address;
+	if (!edit && contains(cur["ucast"]:[], all)) {
+	    media_already();
+	    return cur;
+	}
+	cur["ucast"] = add(cur["ucast"]:[], all);
+    } else if (mn == "media_type_mcast") {
+	string dev = (string)UI::QueryWidget(`id("mcast_device"), `Value);
+	string address = (string)UI::QueryWidget(`id("mcast_address"), `Value);
+	integer ttl = (integer)UI::QueryWidget(`id("ttl"), `Value);
+	if (! IP::Check4(address)) {
+	    Report::Error (IP::Valid4 ());
+	    return cur;
+	}
+	list ip = splitstring(address, ".");
+	integer ip1 = tointeger(ip[0]:"224");
+	if (ip1<224 || ip1>239) {
+	    Report::Error(_("Multicast group address must be class D (224.0.0.0 - 239.255.255.255)."));
+	    return cur;
+	}
+	string all = dev + " " + address + " " + cur["udpport"]:"694" + " " + tostring(ttl) + " 0";
+	if (!edit && contains(cur["mcast"]:[], all)) {
+	    media_already();
+	    return cur;
+	}
+	cur["mcast"] = add(cur["mcast"]:[], all);
+    }
+
+    media_updateList(cur, nil);
+    return cur;
+}
+
+any ConfigureMediaDialog () {
+
+    map old = media_Read();
+    map cur = old;
+    
+    media_SetDialog(old);
+    
+    any ret = nil;
+    while(true) {
+
+	Wizard::SelectTreeItem("media_conf");
+	
+	media_UpdateDialog(cur);
+
+	ret = UI::UserInput();
+	
+	cur = media_Current(cur);
+	
+        if (ret == `abort || ret == `cancel) {
+	    if (ReallyAbort()) return ret;
+	    else continue;
+	}
+
+	if (ret == `help) {
+	    myHelp("media_conf");
+	    continue;
+	}
+	    
+	if (ret == `next || ret == `back || ret == `wizardTree || contains(DIALOG, tostring(ret))) {
+	
+	    if (!media_Write(old, cur)) continue;
+	    
+	    if (ret == `wizardTree)
+	        ret = (string)UI::QueryWidget (`id (`wizardTree), `CurrentItem);
+		
+	    if (ret != `next && ret != `back)
+		ret = symbolof(toterm(ret));
+
+	    break;
+	}
+
+	if (ret == "media_type_serial" || ret == "media_type_bcast" || 
+	    ret == "media_type_ucast" || ret == "media_type_mcast")
+	{
+	    continue;
+	}
+	
+	if (ret == "configured_media_table") {
+	    string curid = (string)UI::QueryWidget(`id("configured_media_table"), `CurrentItem);
+	    list l = regexptokenize(curid, "([a-z]*).([0-9]*)");
+	    integer i = tointeger(l[1]:"0");
+	    UI::ChangeWidget(`id("media_type"), `CurrentButton, "media_type_" + l[0]:"");
+	    if (l[0]:"" == "serial") {
+		UI::ChangeWidget(`id("serial_port"), `Value, cur["serial",i]:"");
+	    } else if (l[0]:"" == "bcast") {
+		UI::ChangeWidget(`id("bcast_device"), `Value, cur["bcast",i]:"");
+	    } else if (l[0]:"" == "ucast") {
+		list m = splitstring(cur["ucast",i]:"", " \t");
+		UI::ChangeWidget(`id("ucast_device"), `Value, m[0]:"");
+		UI::ChangeWidget(`id("ucast_address"), `Value, m[1]:"");
+	    } else if (l[0]:"" == "mcast") {
+		list m = splitstring(cur["mcast",i]:"", " \t");
+		UI::ChangeWidget(`id("mcast_device"), `Value, m[0]:"");
+		UI::ChangeWidget(`id("mcast_address"), `Value, m[1]:"");
+		UI::ChangeWidget(`id("ttl"), `Value, tointeger(m[3]:""));
+	    }
+	    continue;
+	}
+	
+	if (ret == "delete_media") {
+	    cur = media_delete(cur, false);
+	    continue;
+	}
+
+	if (ret == "add_media") {
+	    cur = media_add(cur, false);
+	    continue;
+	}
+
+	if (ret == "edit_media") {
+	    cur = media_delete(cur, true);
+	    cur = media_add(cur, true);
+	    continue;
+	}
+
+	y2error("unexpected retcode: %1", ret);
+    }
+    
+    return ret;
+}
+
+
+
+/* EOF */
+}

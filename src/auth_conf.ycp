@@ -1,0 +1,139 @@
+/**
+ * Package:	Configuration of heartbeat
+ * Authors:	Martin Lazar <mlazar@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "heartbeat";
+
+import "Label";
+import "Wizard";
+import "Heartbeat";
+
+include "heartbeat/helps.ycp";
+include "heartbeat/common.ycp";
+
+string method = "";
+string password = "";
+
+any auth_conf_Read()
+{
+    method = Heartbeat::authkeys["method"]:"";
+    password = Heartbeat::authkeys["password"]:"";
+}
+
+term auth_conf_GetDialog()
+{
+    return `VBox(
+	    `Frame(_("Authentication Method"),
+		`HBox(
+		    `RadioButtonGroup(`id("authmethod"),
+		    	`VBox(
+			    `Left(`RadioButton(`id("crc"), `opt(`notify), _("CRC (No security)"))),
+			    `Left(`RadioButton(`id("sha1"), `opt(`notify), _("SHA1"))),
+			    `Left(`RadioButton(`id("md5"), `opt(`notify), _("MD5")))
+			)
+		    ),
+		    `TextEntry(`id("authkey"), _("Authentication Key"), password)
+		)
+	    ),
+	    `VStretch()
+	);
+}
+
+any auth_conf_UpdateDialog()
+{
+
+    string method1 = (string)UI::QueryWidget(`id("authmethod"), `CurrentButton);
+    UI::ChangeWidget(`id("authkey"), `Enabled, method1 != "crc");
+}
+
+
+boolean auth_conf_Write()
+{
+    string method1 = (string)UI::QueryWidget(`id("authmethod"), `CurrentButton);
+    string password1 = (string)UI::QueryWidget(`id("authkey"), `Value);
+    
+    if (method1 != "crc" && (password1 == "" || password1 == nil)) {
+	Report::Error(_("Missing authentication key."));
+	return false;
+    }
+    
+    if (method1 != method) {
+	Heartbeat::authkeys["modified"] = true;
+	Heartbeat::authkeys["method"] = method1;
+    }
+    
+    if (method1 != "crc" && password != password1) {
+	Heartbeat::authkeys["modified"] = true;
+	Heartbeat::authkeys["password"] = password1;
+    }
+
+    if (method1 == "crc" && password != "") {
+	Heartbeat::authkeys["modified"] = true;
+	Heartbeat::authkeys["password"] = "";
+    }
+
+    return true;
+}
+
+
+any ConfigureAuthDialog () {
+
+    auth_conf_Read();
+
+    my_SetContents("auth_conf", auth_conf_GetDialog());
+
+    UI::ChangeWidget(`id("authmethod"), `CurrentButton, method == "" ? "crc" : method);
+
+    any ret = nil;
+    while(true) {
+    
+	Wizard::SelectTreeItem("auth_conf");
+	
+	auth_conf_UpdateDialog();
+    
+	ret = UI::UserInput();
+
+	if (ret == `help) {
+	    myHelp("auth_conf");
+	    continue;
+	}
+
+	if (ret == `wizardTree) {
+	    ret = (string)UI::QueryWidget (`id (`wizardTree), `CurrentItem);
+	}
+	    
+	if (ret=="crc" || ret=="md5" || ret=="sha1") {
+	    continue;
+	}
+
+        if (ret == `abort || ret == `cancel) {
+	    if (ReallyAbort()) return ret;
+	    else continue;
+	}	
+	
+	if (ret == `next || ret == `back || contains(DIALOG, tostring(ret))) {
+	
+	    if (!auth_conf_Write()) continue;
+	
+	    if (ret != `next && ret != `back)
+		ret = symbolof(toterm(ret));
+		
+	    break;
+	}
+
+	y2error("unexpected retcode: %1", ret);
+	    
+    }
+
+    return ret;
+}
+
+
+
+/* EOF */
+}

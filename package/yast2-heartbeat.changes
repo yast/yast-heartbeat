@@ -1,0 +1,50 @@
+-------------------------------------------------------------------
+Fri Jun  4 13:59:59 CEST 2004 - gizo@suse.cz
+
+- fixed bug 41579 (Strange error Message when starting heartbeat) 
+
+-------------------------------------------------------------------
+Tue Jun  1 18:10:59 CEST 2004 - visnov@suse.cz
+
+- 2.9.3 
+
+-------------------------------------------------------------------
+Mon May 31 11:26:53 CEST 2004 - mlazar@suse.cz
+
+- properly create empty (unconfigured) authkeys file
+- properly write media to ha.cf file
+
+-------------------------------------------------------------------
+Thu May 27 14:04:31 CEST 2004 - visnov@suse.cz
+
+- merged proofread messages 
+- properly handle edit/delete buttons in media dialog
+- 2.9.2
+
+-------------------------------------------------------------------
+Thu May 27 10:58:58 CEST 2004 - mlazar@suse.cz
+
+- a small change in resource screen layout
+
+-------------------------------------------------------------------
+Wed May 26 18:26:21 CEST 2004 - mlazar@suse.cz
+
+- added new dialogs (timouts, ipfail and ping group)
+- added multicast configuration to media dialog
+- support for change order of resources
+- added help texts 
+
+-------------------------------------------------------------------
+Tue May 25 15:21:57 CEST 2004 - arvin@suse.de
+
+- merged proofread messages
+
+-------------------------------------------------------------------
+Wed May 19 13:23:41 CEST 2004 - msvec@suse.cz
+
+- 2.9.0
+
+-------------------------------------------------------------------
+Mon May 17 10:53:17 2004 - mlazar@suse.cz
+
+- initial version

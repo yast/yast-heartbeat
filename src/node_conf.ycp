@@ -1,0 +1,118 @@
+/**
+ * Package:	Configuration of heartbeat
+ * Authors:	Martin Lazar <mlazar@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+textdomain "heartbeat";
+
+import "Label";
+import "Wizard";
+import "Heartbeat";
+import "Report";
+import "SCR";
+
+include "heartbeat/helps.ycp";
+include "heartbeat/common.ycp";
+
+string thisnode = "";
+string othernode = "";
+
+any node_conf_Read()
+{
+    list<string> nodes = Heartbeat::config["node"]:[];
+
+    map unamemap = (map)SCR::Execute(.target.bash_output, "uname -n");
+    thisnode = deletechars(unamemap["stdout"]:"", "\n");
+
+    foreach(string s, nodes, { if (s != thisnode) othernode = s; });
+}
+
+boolean node_conf_Write()
+{
+
+    string newnode = (string)UI::QueryWidget(`id("othernode"), `Value);
+    if (newnode == nil || newnode == "") {
+	Report::Error(_("The other node name is required."));
+	return false;
+    }
+    if (newnode == thisnode) {
+	Report::Error(_("The other node name cannot be same as this node name."));
+	return false;
+    }
+    
+    list<string> onodes = Heartbeat::config["node"]:[];
+    if (size(onodes) != 2 || onodes[0]:"" != thisnode || onodes[1]:"" != newnode) {
+	Heartbeat::config["node"] = [ thisnode, newnode ];
+	Heartbeat::config["modified"] = true;
+    }
+    
+    return true;
+}
+    
+term node_conf_getDialog()
+{
+    return `HBox(
+//	`HWeight(1, `Empty()),
+//	`HWeight(8, 
+	  `VBox(
+	    `VSpacing(1),
+	    `Frame(
+		_("This Node Name"),
+		`HBox(
+		    `Label(thisnode),
+		    `HStretch())),
+	    `VSpacing(1),
+	    `Frame(
+		_("The Other Node"),
+		`TextEntry(`id("othernode"), `opt (`hstretch), _("Node Name"), othernode)),
+	    `VStretch()));
+//	`HWeight(1, `Empty()));
+}
+
+any ConfigureNodeDialog () {
+
+    node_conf_Read();
+    
+    my_SetContents("node_conf", node_conf_getDialog());
+    
+    any ret = nil;
+    while(true) {
+    
+	Wizard::SelectTreeItem("node_conf");
+
+	ret = UI::UserInput();
+
+        if (ret == `abort || ret == `cancel) {
+	    if (ReallyAbort()) return ret;
+	    else continue;
+	}
+
+	if (ret == `help) {
+	    myHelp("node_conf");
+	    continue;
+	}
+
+	if (ret == `wizardTree)
+	    ret = (string)UI::QueryWidget (`id (`wizardTree), `CurrentItem);
+
+	if (ret == `next || ret == `back || contains(DIALOG, (string)ret)) {
+	
+	    if (!node_conf_Write()) continue;
+	    
+	    if (ret != `next && ret != `back)
+		ret = symbolof(toterm(ret));
+
+	    break;
+	}
+
+	y2error("unexpected retcode: %1", ret);
+    }
+
+    return ret;
+}
+
+/* EOF */
+}

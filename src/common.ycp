@@ -1,0 +1,112 @@
+/**
+ * Package:	Configuration of heartbeat
+ * Authors:	Martin Lazar <mlazar@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "heartbeat";
+
+import "Label";
+import "Wizard";
+import "Heartbeat";
+import "Popup";
+import "CWM";
+
+//include "heartbeat/helps.ycp";
+
+list<string> DIALOG = [
+    "startup_conf",
+    "node_conf",
+    "media_conf",
+    "auth_conf",
+    "resources_conf",
+    "stonith_conf",
+    "timeouts_conf",
+    "ipfail_conf",
+    "group_conf"
+];
+
+map PARENT = $[
+    "group_conf":"ipfail_conf"
+];
+
+map NAME = $[
+    "startup_conf":	_("Start-up Configuration"),
+    "node_conf":	_("Node Configuration"),
+    "media_conf":	_("Media Configuration"),
+    "auth_conf":	_("Authentication Keys"),
+    "resources_conf":	_("Resources"),
+    "stonith_conf":	_("STONITH Configuration"),
+    "timeouts_conf":	_("Time-outs"),
+    "ipfail_conf":	_("IP Fail"),
+    "group_conf":	_("Ping Groups")
+];
+
+boolean Modified() {
+    return Heartbeat::Modified();
+}
+
+boolean ReallyAbort() {
+    return !Heartbeat::Modified() || Popup::ReallyAbort(true);
+}
+
+boolean PollAbort() {
+    return UI::PollInput() == `abort;
+}
+
+boolean cmpList(list a, list b)
+{
+    boolean same = true;
+    if (size(a) != size(b)) {
+	same = false;
+	// TODO!!
+    }
+    return false;
+}
+
+any my_SetContents(string conf, term contents)
+{
+    Wizard::SetContents("Heartbeat - " + NAME[conf]:"", 
+	contents, HELPS[conf]:"", true, true);
+
+    if (UI::WidgetExists(`id(`wizardTree)))
+    {
+//	UI::ChangeWidget(`id(`wizardTree), `CurrentItem, current_dialog);
+	UI::SetFocus (`id (`wizardTree));
+    }
+
+    if (Heartbeat::firstrun) {
+	UI::ChangeWidget(`id(`back), `Enabled, conf != "startup_conf");
+        if (conf == "stonith_conf") {
+	    UI::WizardCommand(`SetNextButtonLabel( Label::FinishButton() ) );
+	    Wizard::ReplaceNextButton(`PushButton(`id(`next), `opt(`key_F10), Label::FinishButton()));
+	} else {
+    	    UI::WizardCommand(`SetNextButtonLabel( Label::NextButton() ) );
+	    Wizard::ReplaceNextButton(`PushButton(`id(`next), `opt(`key_F10), Label::NextButton()));
+	}
+    }
+}
+
+any myHelp(string help)
+{
+    UI::OpenDialog( `opt(`decorated ),
+	`HBox( `VSpacing(16),
+	    `VBox(
+		`HSpacing(60),
+		`VSpacing(0.5),
+		`RichText(HELPS[help]:""),
+		`VSpacing(1.5),
+		`PushButton(`id(`ok), `opt(`default, `key_F10), Label::OKButton())
+	    )
+	)
+    );
+
+    UI::SetFocus(`id(`ok));
+    UI::UserInput();
+    UI::CloseDialog();
+}
+
+}

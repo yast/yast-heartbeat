@@ -1,0 +1,19 @@
+/**
+ * File:	etc_ha_d_ha_cf.scr
+ * Summary:	Agent for reading/writing /etc/ha.d/ha.cf
+ * Access:	read/write
+ * Authors:	Martin Lazar <mlazar@suse.cz>
+ * See:		heartbeat(8)
+ *
+ * $Id$
+ */
+.etc.ha_d.ha_cf
+
+`ag_ini(
+    `IniAgent( "/etc/ha.d/ha.cf",
+	$[
+	    "options"	: [ "global_values", "flat", "repeat_names" ],
+	    "comments"	: [ "#.*" ],
+	    "params"	: [ $[ "match" : [ "^[ \t]*([^ \t]+)[ \t]+(.+)$", "%s %s" ] ] ]
+	]
+))

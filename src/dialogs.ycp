@@ -1,0 +1,41 @@
+/**
+ * Package:	Configuration of heartbeat
+ * Authors:	Martin Lazar <mlazar@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "heartbeat";
+
+import "Label";
+import "Wizard";
+import "Heartbeat";
+
+include "heartbeat/startup_conf.ycp";
+include "heartbeat/node_conf.ycp";
+include "heartbeat/media_conf.ycp";
+include "heartbeat/auth_conf.ycp";
+include "heartbeat/resources_conf.ycp";
+include "heartbeat/stonith_conf.ycp";
+include "heartbeat/timeouts_conf.ycp";
+include "heartbeat/ipfail_conf.ycp";
+
+symbol ReadDialog() {
+    Wizard::RestoreHelp(HELPS["read"]:"");
+    Heartbeat::AbortFunction = PollAbort;
+    boolean ret = Heartbeat::Read();
+    return ret ? `next : `abort;
+}
+
+symbol WriteDialog() {
+    Wizard::RestoreHelp(HELPS["write"]:"");
+    Heartbeat::AbortFunction = PollAbort;
+    boolean ret = Heartbeat::Write();
+    return ret ? `next : `abort;
+}
+
+
+/* EOF */
+}

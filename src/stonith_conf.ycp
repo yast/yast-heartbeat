@@ -1,0 +1,188 @@
+/**
+ * Package:	Configuration of heartbeat
+ * Authors:	Martin Lazar <mlazar@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "heartbeat";
+
+import "Label";
+import "Wizard";
+import "Heartbeat";
+
+include "heartbeat/helps.ycp";
+include "heartbeat/common.ycp";
+
+string xx = _("Specified STONITH host is already present.");
+
+any ConfigureStonithDialog () {
+
+    list<string> stonith = Heartbeat::config["stonith_host"]:[];
+    boolean modified = false;
+
+    stonith = maplist(string s, stonith, {
+	list l = regexptokenize(s, "([^ \t]*)[ \t]*([^ \t]*)[ \t]*(.*)");
+	return l[0]:"" + " " + l[1]:"" + " " + l[2]:"";
+    });
+    
+    map run = (map)SCR::Execute(.target.bash_output, "/usr/sbin/stonith -L");
+    list devicetypes = splitstring(run["stdout"]:"", "\n");
+    
+    list nodes = add(Heartbeat::config["node"]:[], "*");
+
+    term contents = 
+        `VBox(
+	    `VSquash(`HBox(
+                `HWeight( 9,
+                    `Frame(_("Add STONITH Host"),
+                        `HBox(
+			    `Left(`ComboBox(`id("host"), `opt(`editable), _("Host from"), nodes)),
+			    `HStretch(),
+                            `Left(`ComboBox(`id("type"), `opt(`editable), _("STONITH Type"), devicetypes)),
+			    `HStretch(),
+                            `Left(`TextEntry(`id("parameters"), _("Parameters")))
+                        )
+                    )
+                ),
+                `HWeight( 2,
+                    `VBox(
+                        `VSpacing(1),
+                        `VSquash(
+                            `PushButton(`id("add_stonith"), Label::AddButton())),
+			`VSpacing(0.5),
+			`VSquash(
+			    `PushButton(`id("edit_stonith"), Label::EditButton())),
+                        `VStretch()
+                    )
+                )
+            )),
+	    `HBox(
+		`HWeight( 9, 
+		    `Table(`id("stonith_table"), `opt(`notify),
+			`header("Host From", "Type", "Parameters"))
+		),
+		`HWeight( 2,
+		    `VBox(
+			`VSpacing(1),
+			`VSquash(
+			    `PushButton(`id("delete_stonith"), Label::DeleteButton())),
+			`VStretch()
+		    )
+		)
+	    )
+
+        );
+
+    my_SetContents("stonith_conf", contents);
+    
+    UI::ChangeWidget(`id("host"), `Value, "*");
+
+    any ret = nil;
+    string curid = nil;
+    while(true) {
+    
+	list istonith = maplist(string s, (list<string>)stonith, {
+	    list l = regexptokenize(s, "([^ \t]*)[ \t]*([^ \t]*)[ \t]*(.*)");
+	    return `item(`id(s), l[0]:"", l[1]:"", l[2]:"");
+	});
+	UI::ChangeWidget(`id("stonith_table"), `Items, istonith);
+	if (curid != nil && !contains(stonith, curid)) curid = nil;
+	if (curid != nil) {
+	    UI::ChangeWidget(`id("stonith_table"), `CurrentItem, curid);
+	}
+	
+	UI::ChangeWidget(`id("delete_stonith"), `Enabled, size(istonith)>0);
+	UI::ChangeWidget(`id("edit_stonith"), `Enabled, size(istonith)>0);
+	
+        ret = UI::UserInput();
+
+        if (ret == `abort || ret == `cancel) {
+	    if (modified) {
+		Heartbeat::config["modified"] = true;
+	    }
+	    if (ReallyAbort()) return ret;
+	    else continue;
+	}
+
+	if (ret == `next || ret == `back) break;
+	
+	if (ret == `help) {
+	    myHelp("stonith_conf");
+	    continue;
+	}
+
+	curid = (string)UI::QueryWidget(`id("stonith_table"), `CurrentItem);
+	
+	if (ret == "stonith_table") {
+	    if (curid != nil) {
+		list l = regexptokenize(curid, "([^ \t]*)[ \t]*([^ \t]*)[ \t]*(.*)");
+		UI::ChangeWidget(`id("host"), `Value, l[0]:"");
+		UI::ChangeWidget(`id("type"), `Value, l[1]:"");
+		UI::ChangeWidget(`id("parameters"), `Value, l[2]:"");
+	    }
+	    continue;
+	}
+	
+	if (ret == "delete_stonith") {
+	    if (curid != nil) {
+		stonith = filter(string s, (list<string>)stonith, { return s != curid; });
+	    }
+	    modified = true;
+	    continue;
+	}
+	
+	if (ret == "add_stonith" || ret == "edit_stonith") {
+	    string host = (string)UI::QueryWidget(`id("host"), `Value);
+	    string type = (string)UI::QueryWidget(`id("type"), `Value);
+	    string param = (string)UI::QueryWidget(`id("parameters"), `Value);
+	    if (host == "") {
+	        Report::Error(_("Specify the host name."));
+	        continue;
+	    }
+	    if (type == "") {
+	        Report::Error(_("Specify the STONITH type."));
+	        continue;
+	    }
+	    string new = host + " " + type + " " + param;
+	    if (ret == "edit_stonith") {
+	        stonith = filter(string s, (list<string>)stonith, { return s != curid; });
+	    } else if (contains(stonith, new)) {
+	        Report::Error(_("The specified STONITH is already present."));
+	        continue;
+	    }
+	    modified = true;
+	    if (ret == "edit_stonith") {
+	        stonith = filter(string s, (list<string>)stonith, { return s != curid; });
+	    }
+	    curid = new;
+	    stonith = add(stonith, curid);
+	    continue;
+	}
+
+	if (ret == `wizardTree)
+	    ret = (string)UI::QueryWidget (`id (`wizardTree), `CurrentItem);
+
+	
+	if (contains(DIALOG, (string)ret)) {
+	    ret = symbolof(toterm(ret));
+	    break;
+	}
+
+	y2error("unexpected retcode: %1", ret);
+    }
+    
+    if (modified) {
+	Heartbeat::config["stonith_host"] = stonith;
+	Heartbeat::config["modified"] = true;
+    }
+
+    return ret;
+}
+
+/* EOF */
+}
+
+
