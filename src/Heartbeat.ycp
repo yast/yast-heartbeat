@@ -20,6 +20,9 @@ import "Report";
 import "Summary";
 import "Service";
 
+import "Mode";
+import "PackageSystem";
+
 global map config = $[];
 global map authkeys = $[];
 global map resources = $[];
@@ -113,6 +116,13 @@ global boolean Read() {
     );
 
     Progress::NextStage();
+    
+    // check installed packages
+    if (!Mode::test && !PackageSystem::CheckAndInstallPackagesInteractive(["heartbeat"]))
+    {
+	return false;
+    }
+    
     if(SCR::Read(.target.size, ha_dir + "/ha.cf") > 0) {
 
 	foreach(string key, [ "debugfile", "logfile", "logfacility", "keepalive", "deadtime", "warntime",

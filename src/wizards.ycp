@@ -12,7 +12,6 @@ textdomain "heartbeat";
 
 import "Sequencer";
 import "Wizard";
-import "Require";
 
 include "heartbeat/dialogs.ycp";
 include "heartbeat/common.ycp";
@@ -122,16 +121,6 @@ any HeartbeatSequence() {
 	    `next	: `next
 	]
     ];
-
-    if (!Require::IsPackageInstalledTarget ("heartbeat"))
-    {
-	if (!Require::RequireAndConflictTarget (["heartbeat"], [],
-	     _("<p>To configure Heartbeat, the <b>%1</b> package must be installed.</p>") +
-	     _("<p>Install it now?</p>")))
-	{
-	    return nil;
-	}
-    }
 
     Wizard::CreateDialog();
 
