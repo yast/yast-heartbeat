@@ -16,7 +16,7 @@ X-SuSE-YaST-Geometry=
 X-SuSE-YaST-SortKey=
 X-SuSE-YaST-AutoInstResource=heartbeat
 
-Icon=default
+Icon=yast-heartbeat
 Exec=/sbin/yast2 heartbeat 
 
 Name=High Availability
