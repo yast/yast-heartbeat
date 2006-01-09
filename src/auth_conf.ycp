@@ -19,7 +19,7 @@ include "heartbeat/common.ycp";
 string method = "";
 string password = "";
 
-any auth_conf_Read()
+void auth_conf_Read()
 {
     method = Heartbeat::authkeys["method"]:"";
     password = Heartbeat::authkeys["password"]:"";
@@ -44,7 +44,7 @@ term auth_conf_GetDialog()
 	);
 }
 
-any auth_conf_UpdateDialog()
+void auth_conf_UpdateDialog()
 {
 
     string method1 = (string)UI::QueryWidget(`id("authmethod"), `CurrentButton);

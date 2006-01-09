@@ -90,7 +90,7 @@ any my_SetContents(string conf, term contents)
     }
 }
 
-any myHelp(string help)
+void myHelp(string help)
 {
     UI::OpenDialog( `opt(`decorated ),
 	`HBox( `VSpacing(16),

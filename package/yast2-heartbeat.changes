@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Jan  9 09:02:37 CET 2006 - lslezak@suse.cz
+
+- fixed return types (use "void" for functions without return)
+- use Mode::test()
+- 2.13.0
+
+-------------------------------------------------------------------
 Fri Sep 10 16:42:48 CEST 2004 - mlazar@suse.cz
 
 - Required replaced by PackageSystem (see bug 30872)

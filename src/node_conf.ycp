@@ -20,7 +20,7 @@ include "heartbeat/common.ycp";
 string thisnode = "";
 string othernode = "";
 
-any node_conf_Read()
+void node_conf_Read()
 {
     list<string> nodes = Heartbeat::config["node"]:[];
 

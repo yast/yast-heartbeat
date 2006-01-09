@@ -74,7 +74,7 @@ any ipfail_conf_updatePingList(list l, string selected)
     }
 }
     
-any ipfail_conf_SetDialog(map f)
+void ipfail_conf_SetDialog(map f)
 {
     
 //    term TEnab = `Left(`CheckBox(`id("enable"), _("Enable IP Fail")));
@@ -106,7 +106,7 @@ any ipfail_conf_SetDialog(map f)
 
 }
 
-any ipfail_conf_UpdateDialog(map f)
+void ipfail_conf_UpdateDialog(map f)
 {
     UI::ChangeWidget(`id("ping_del"), `Enabled, size(f["ping"]:[])>0);
 }
@@ -248,7 +248,7 @@ any group_conf_updateList(map g, string sel)
     }
 }
 
-any group_conf_UpdateDialog(map g)
+void group_conf_UpdateDialog(map g)
 {
     UI::ChangeWidget(`id("group_edit"), `Enabled, size(g)>0);
     UI::ChangeWidget(`id("group_del"), `Enabled, size(g)>0);
@@ -259,7 +259,7 @@ map group_conf_Current(map old)
     return old;
 }
     
-any group_conf_SetDialog(map g)
+void group_conf_SetDialog(map g)
 {
     term contents = `VBox(
 	`VSquash(`HBox(

@@ -118,7 +118,7 @@ global boolean Read() {
     Progress::NextStage();
     
     // check installed packages
-    if (!Mode::test && !PackageSystem::CheckAndInstallPackagesInteractive(["heartbeat"]))
+    if (!Mode::test() && !PackageSystem::CheckAndInstallPackagesInteractive(["heartbeat"]))
     {
 	return false;
     }

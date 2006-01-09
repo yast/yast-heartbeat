@@ -96,7 +96,7 @@ any media_updateList(map media, string sel)
     }
 }
 
-any media_SetDialog(map media)
+void media_SetDialog(map media)
 {
     list serial_ports = [ "/dev/ttyS0", "/dev/ttyS1", "/dev/ttyS2" ];
     list net_devices = [ "eth0", "eth1" ];
@@ -161,7 +161,7 @@ any media_SetDialog(map media)
     media_updateList(media, nil);
 }
 
-any media_UpdateDialog(map media)
+void media_UpdateDialog(map media)
 {
     boolean media_non_empty = size (media["bcast"]:[]) > 0
 	|| size (media["mcast"]:[])>0
@@ -194,7 +194,7 @@ map media_Current(map old)
     return new;
 }
 
-any media_already()
+void media_already()
 {
     Report::Error(_("Specified media is already present."));
 }

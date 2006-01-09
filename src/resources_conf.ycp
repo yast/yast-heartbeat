@@ -163,7 +163,7 @@ any res_SetDialog(map r)
     res_updateList(r, 1, r["resources",1,0]:"");
 }
 
-any res_UpdateDialog(map r)
+void res_UpdateDialog(map r)
 {
     foreach(integer n, [0, 1], {
 	boolean enab = size(r["resources",n]:[]) > 0;

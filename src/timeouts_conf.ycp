@@ -104,7 +104,7 @@ term timeouts_conf_SetContents(map to)
     UI::ChangeWidget(`id("wd_dev"), `Value, watchdog == "" ? "/dev/watchdog" : watchdog);
 }
 
-any timeouts_conf_UpdateDialog(map to)
+void timeouts_conf_UpdateDialog(map to)
 {
     UI::ChangeWidget(`id("wd_dev"), `Enabled, to["wd_enab"]:true);
 }
