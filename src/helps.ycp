@@ -37,7 +37,7 @@ peer -- without a domain name appended.</p>
     
     "media_conf" : _("<p>In <b>Media Configuration</b>, specify the
 interconnects Heartbeat should use for its internal control
-and liveness messages. It is <b>strongly</b>
+and liveness messages. It is strongly
 recommended to specify more than one media for redundancy reasons.</p>
 ") +
     _("<p>Choose at least one <b>Heartbeat Medium</b>. At least two independent
@@ -71,9 +71,8 @@ attacks.</p>
 ") +
     _("<p>Both <b>md5</b> and <b>sha1</b> require a <i>shared
 secret</i>, which is used to protect and authenticate the messages. The
-<b>crc</b> mechanism does <b>not</b> do message authentication and 
-only protects against corruption, not against attacks.</p>
-") +
+<b>crc</b> mechanism does not do message authentication and 
+only protects against corruption, not against attacks.</p>\n") +
     _("<p>It is recommended to choose the <b>sha1</b> method, which is the
     strongest authentication scheme available, and an appropriately strong
     password. This must be exactly the same on all cluster
