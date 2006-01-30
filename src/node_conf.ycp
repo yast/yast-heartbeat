@@ -54,22 +54,56 @@ boolean node_conf_Write()
     
 term node_conf_getDialog()
 {
-    return `HBox(
-//	`HWeight(1, `Empty()),
-//	`HWeight(8, 
-	  `VBox(
-	    `VSpacing(1),
-	    `Frame(
-		_("This Node Name"),
-		`HBox(
-		    `Label(thisnode),
-		    `HStretch())),
-	    `VSpacing(1),
-	    `Frame(
-		_("The Other Node"),
-		`TextEntry(`id("othernode"), `opt (`hstretch), _("Node Name"), othernode)),
-	    `VStretch()));
-//	`HWeight(1, `Empty()));
+   return `VBox(
+            `HBox(
+	        `HWeight( 9,
+	          `Frame(_("This Node"),
+		      `HBox(
+		          `Label(thisnode),
+		          `HStretch(),
+		          `Label("127.0.0.1")
+                      )
+                   )
+                )
+            ),
+	    `VSquash(
+            `HBox(
+                `HWeight( 9,
+                    `Frame(_("Add Nodes"),
+                        `HBox(
+		            `Left(`TextEntry(`id("othernode"),_("Node Name"), othernode)),
+			    `HStretch(),
+		            `Left(`TextEntry(`id("othernodeip"),_("Node IP")))
+                        )
+                    )
+                ),
+                `HWeight( 2,
+                    `VBox(
+                        `VSpacing(1),
+                        `VSquash(
+                            `PushButton(`id("add_stonith"), Label::AddButton())),
+			`VSpacing(0.5),
+			`VSquash(
+			    `PushButton(`id("edit_stonith"), Label::EditButton())),
+                        `VStretch()
+                    )
+                )
+            )),
+	    `HBox(
+		`HWeight( 9, 
+		    `Table(`id("stonith_table"), `opt(`notify),
+			`header("Node Name", "Node IP"))
+		),
+		`HWeight( 2,
+		    `VBox(
+			`VSpacing(1),
+			`VSquash(
+			    `PushButton(`id("delete_stonith"), Label::DeleteButton())),
+			`VStretch()
+		    )
+		)
+	    )
+        );
 }
 
 any ConfigureNodeDialog () {

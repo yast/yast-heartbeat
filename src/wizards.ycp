@@ -71,13 +71,12 @@ any TabSequence() {
 any FirstRunSequence() {
 
     map sequence = $[ 
-	"ws_start" : "startup_conf",
-	"startup_conf": $[ `next:"node_conf", `back:"startup_conf", `abort:`abort ],
-	"node_conf": $[ `next:"media_conf", `back:"startup_conf", `abort:`abort ],
-	"media_conf": $[ `next:"auth_conf", `back:"node_conf", `abort:`abort ],
-	"auth_conf": $[ `next:"resources_conf", `back:"media_conf", `abort:`abort ],
-	"resources_conf": $[ `next:"stonith_conf", `back:"auth_conf", `abort:`abort, `node_conf:"node_conf" ],
-	"stonith_conf": $[ `next:`next, `back:"resources_conf", `abort:`abort ]
+	"ws_start" : "node_conf",
+	"node_conf": $[ `next:"auth_conf", `back:"node_conf", `abort:`abort ],
+	"auth_conf": $[ `next:"media_conf", `back:"node_conf", `abort:`abort ],
+	"media_conf": $[ `next:"stonith_conf", `back:"media_conf", `abort:`abort ],
+	"stonith_conf": $[ `next:"startup_conf", `back:"media_conf", `abort:`abort ],
+	"startup_conf": $[ `next:`next, `back:"stonith_conf", `abort:`abort ]
     ];
 	
     any ret = Sequencer::Run(Aliases, sequence);

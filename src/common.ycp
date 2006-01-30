@@ -18,15 +18,16 @@ import "CWM";
 //include "heartbeat/helps.ycp";
 
 list<string> DIALOG = [
-    "startup_conf",
     "node_conf",
-    "media_conf",
     "auth_conf",
-    "resources_conf",
+    "media_conf",
     "stonith_conf",
-    "timeouts_conf",
-    "ipfail_conf",
-    "group_conf"
+    "startup_conf"
+
+/*     "resources_conf", */
+/*     "timeouts_conf", */
+/*     "ipfail_conf", */
+/*     "group_conf" */
 ];
 
 map PARENT = $[
