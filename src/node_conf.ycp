@@ -13,11 +13,13 @@ import "Wizard";
 import "Heartbeat";
 import "Report";
 import "SCR";
+import "NetworkDevices";
 
 include "heartbeat/helps.ycp";
 include "heartbeat/common.ycp";
 
 string thisnode = "";
+string thisnodeip = "";
 string othernode = "";
 
 void node_conf_Read()
@@ -27,6 +29,17 @@ void node_conf_Read()
     map unamemap = (map)SCR::Execute(.target.bash_output, "uname -n");
     thisnode = deletechars(unamemap["stdout"]:"", "\n");
 
+    //read current settings for network
+    NetworkDevices::Read();
+
+    //generate the map: static IP -> device
+    list<string>devs=NetworkDevices::Locate("BOOTPROTO","static");
+    foreach(string dev, devs,
+    {
+	string ip=NetworkDevices::GetValue(dev,"IPADDR");
+	if(ip!=nil && ip != "")thisnodeip=ip;
+    });
+
     foreach(string s, nodes, { if (s != thisnode) othernode = s; });
 }
 
@@ -34,14 +47,14 @@ boolean node_conf_Write()
 {
 
     string newnode = (string)UI::QueryWidget(`id("othernode"), `Value);
-    if (newnode == nil || newnode == "") {
-	Report::Error(_("The other node name is required."));
-	return false;
-    }
-    if (newnode == thisnode) {
-	Report::Error(_("The other node name cannot be same as this node name."));
-	return false;
-    }
+//     if (newnode == nil || newnode == "") {
+// 	Report::Error(_("The other node name is required."));
+// 	return false;
+//     }
+//     if (newnode == thisnode) {
+// 	Report::Error(_("The other node name cannot be same as this node name."));
+// 	return false;
+//     }
     
     list<string> onodes = Heartbeat::config["node"]:[];
     if (size(onodes) != 2 || onodes[0]:"" != thisnode || onodes[1]:"" != newnode) {
@@ -60,8 +73,10 @@ term node_conf_getDialog()
 	          `Frame(_("This Node"),
 		      `HBox(
 		          `Label(thisnode),
-		          `HStretch(),
-		          `Label("127.0.0.1")
+// 		          `HStretch(),
+		          `Label("("),
+		          `Label(thisnodeip),
+		          `Label(")")
                       )
                    )
                 )

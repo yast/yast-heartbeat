@@ -127,7 +127,7 @@ global boolean Read() {
 
 	foreach(string key, [ "debugfile", "logfile", "logfacility", "keepalive", "deadtime", "warntime",
 	    "initdead", "udpport", "baud", "auto_failback", "hopfudge", "deadping", "watchdog",
-	    "hbgenmethod", "realtime", "debug" ],
+	    "hbgenmethod", "realtime", "debug", "autojoin", "crm" ],
 	{
 	    list vals = (list)SCR::Read(topath(sformat(".etc.ha_d.ha_cf.\"%1\"", key)));
 	    if (size(vals)>0) {
@@ -153,6 +153,19 @@ global boolean Read() {
 	});
     } else {
 	firstrun = true;
+
+	list aa = [];
+	aa = add(aa, "mgmtd uid=hacluster,root");
+	aa = add(aa, "evms uid=hacluster,root");
+	config["apiauth"] = aa;
+
+	list rs = [];
+	rs = add(rs, "root /usr/lib/heartbeat/mgmtd -v");
+	rs = add(rs, "root /sbin/evmsd");
+	config["respawn"] = rs;
+
+	config["autojoin"] = "any";
+	config["crm"] = "true";
     }
     config["modified"] = false;
 
@@ -231,7 +244,7 @@ global boolean Write() {
 
         foreach(string key, [ "debugfile", "logfile", "logfacility", "keepalive", "deadtime", "warntime",
     	    "initdead", "udpport", "baud", "auto_failback", "watchdog", "hopfudge", "deadping",
-	    "hbgenmethod", "realtime", "debug" ],
+	    "hbgenmethod", "realtime", "debug", "autojoin", "crm" ],
 	{
 //	    if (config[key]:nil != nil) {
         	y2milestone("write %1  = '%2'", key, config[key]:"");

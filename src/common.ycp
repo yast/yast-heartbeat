@@ -80,8 +80,8 @@ any my_SetContents(string conf, term contents)
     }
 
     if (Heartbeat::firstrun) {
-	UI::ChangeWidget(`id(`back), `Enabled, conf != "startup_conf");
-        if (conf == "stonith_conf") {
+	UI::ChangeWidget(`id(`back), `Enabled, conf != "node_conf");
+        if (conf == "startup_conf") {
 	    UI::WizardCommand(`SetNextButtonLabel( Label::FinishButton() ) );
 	    Wizard::ReplaceNextButton(`PushButton(`id(`next), `opt(`key_F10), Label::FinishButton()));
 	} else {

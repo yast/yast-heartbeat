@@ -109,20 +109,20 @@ void media_SetDialog(map media)
 	`HStretch());
 
     term TRadio = `RadioButtonGroup( `id ("media_type"), `VBox(
-        `Left(`HBox(
-	    `RadioButton( `id ("media_type_serial"), `opt(`notify), _("Serial Port"), true),
-	    `HSpacing(2),
-	    `ComboBox(`id("serial_port"), `opt(`editable), _("Serial Port Name"), serial_ports))),
+//         `Left(`HBox(
+// 	    `RadioButton( `id ("media_type_serial"), `opt(`notify), _("Serial Port"), true),
+// 	    `HSpacing(2),
+// 	    `ComboBox(`id("serial_port"), `opt(`editable), _("Serial Port Name"), serial_ports))),
 	`Left(`HBox(
 	    `RadioButton( `id ("media_type_bcast"), `opt(`notify), _("Broadcast"), false),
 	    `HSpacing(2),
 	    `ComboBox(`id("bcast_device"), `opt(`editable), _("Device"), net_devices))),
-	`Left(`HBox(
-	    `RadioButton(`id("media_type_ucast"), `opt(`notify), _("Unicast"), false),
-	    `HSpacing(2),
-	    `TextEntry(`id("ucast_address"), _("IP Address"), "" ),
-	    `HSpacing(1),
-	    `ComboBox(`id("ucast_device"), `opt(`editable), _("Device"), net_devices))),
+// 	`Left(`HBox(
+// 	    `RadioButton(`id("media_type_ucast"), `opt(`notify), _("Unicast"), false),
+// 	    `HSpacing(2),
+// 	    `TextEntry(`id("ucast_address"), _("IP Address"), "" ),
+// 	    `HSpacing(1),
+// 	    `ComboBox(`id("ucast_device"), `opt(`editable), _("Device"), net_devices))),
 	`Left(`HBox(
 	    `RadioButton(`id("media_type_mcast"), `opt(`notify), _("Multicast"), false),
 	    `HSpacing(2),
@@ -150,7 +150,8 @@ void media_SetDialog(map media)
 	    `PushButton(`id("delete_media"), `opt(`hstretch), Label::DeleteButton()),
 	    `VStretch())));
 	    
-    term contents = `VBox(TAdd, `VSpacing(0.5), TList, TPort);
+/*    term contents = `VBox(TAdd, `VSpacing(0.5), TList, TPort);*/
+    term contents = `VBox(TAdd, `VSpacing(0.5), TList);
 
     my_SetContents("media_conf",contents);
 
