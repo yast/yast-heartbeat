@@ -27,102 +27,58 @@ Abort the save procedure by pressing <b>Abort</b>.
 An additional dialog informs whether it is safe to do so.
 </p>
 "),
-    
-    "node_conf" : _("<p><b>Node Configuration</b> lets you specify and
-add nodes to your cluster. This installation program lets you create
-a new cluster or add nodes to an existing cluster. To add new nodes
-to an existing cluster, you must run this installation program from a
-node that is already in the cluster, not on a node that you want to add
-to the cluster.</p>
+
+    "node_conf" : _("<p><b>Node Configuration</b> allows configuration of the
+node names of the two nodes in the cluster -- this one and its
+peer -- without a domain name appended.</p>
 ") + 
-
-    _("<p>This cluster installation program does not copy the Heartbeat
-software package to cluster nodes. Prior to running this installation program, the
-Heartbeat software package must be installed on all nodes that will
-part of your cluster.</p>") +
-
-    _("<p>To add a node to the cluster, enter the node name and the IP
-address of the node and then click Add. Repeat this process for each
-node you want to add to the cluster. You can find node names for servers
-by entering the <i>uname -n</i> command on each node.</p>") +
-
- _("<p>If after adding a node to the cluster, you need to specify a 
-different IP address or node name for that node, select the node,
-click Edit, and then change the node name or IP address.</p>"),
+    _("<p>The names specified here should match the output of
+<i>uname -n</i> on each node.</p>"),
     
-    "auth_conf" : _("<p>Specify the authentication method to
- use for network communication between cluster nodes. Choosing
-an authentication method will protect against network attacks.</p>
+    "media_conf" : _("<p>In <b>Media Configuration</b>, specify the
+interconnects Heartbeat should use for its internal control
+and liveness messages. It is strongly
+recommended to specify more than one media for redundancy reasons.</p>
 ") +
-    _("<p>Both the <b>md5</b> and <b>sha1</b> methods require a
- <i>shared secret</i>, which is used to protect and authenticate
- messages. The <b>crc</b> method does not perform message authentication,
- and only protects against corruption, not against attacks.</p>\n") +
-
-    _("<p>The <b>sha1</b> method is recommended because it provides the
-    strongest authentication scheme available. The authentication key
-(password) you specify will be used on all nodes in the cluster.</p>
-"),    
-
-    "auth_conf" : _("<p>Specify the authentication method to
- use for network communication between cluster nodes. Choosing
-an authentication method will protect against network attacks.</p>
+    _("<p>Choose at least one <b>Heartbeat Medium</b>. At least two independent
+ones are strongly recommended.</p>
 ") +
-    _("<p>Both the <b>md5</b> and <b>sha1</b> methods require a
- <i>shared secret</i>, which is used to protect and authenticate
- messages. The <b>crc</b> method does not perform message authentication,
- and only protects against corruption, not against attacks.</p>\n") +
-
-    _("<p>The <b>sha1</b> method is recommended because it provides the
-    strongest authentication scheme available. The authentication key
-(password) you specify will be used on all nodes in the cluster.</p>
-"),    
-
-    "media_conf" : _("<p><b>Heartbeat Media Configuration</b> lets you
- specify the method Heartbeat should use for internal communication
-between cluster nodes. This provides a way for cluster nodes to signal
-that they are alive to other nodes in the cluster. For proper redundancy,
-you should specify more than one heartbeat medium if possible.</p>
+    _("<p>If specifying a <b>Serial Port</b>, provide the correct
+device file name of the port connected to the peer node via a null-modem
+cable.</p>") +
+    _("<p>For a <b>broadcast</b> medium, choose one of the available network
+devices.</p>
 ") +
-    _("<p>Choose at least one <b>Heartbeat Medium</b>, and if possible,
- two or more. After specifying a heartbeat medium, click Add to add
-that medium type to Heartbeat.</p>
-") +
-    _("<p>If you choose <b>Broadcast</b>, select one of the available network
-devices in the device list.</p>
-") +
-    _("<p>For <b>multicast</b>, choose a network device, multicast
+    _("<p>For a <b>unicast</b> medium, provide both the IP address of the peer
+to use and the network interface.</p>") +
+    _("<p>For a <b>multicast</b> medium, choose network device, multicast
 group to join (class D multicast address 224.0.0.0 - 239.255.255.255) and
-the ttl value (1-255).</p>"),
-    
-    "stonith_conf" : _("<p>To protect the shared data, <b>STONITH</b>
- must be configured. Heartbeat is capable of driving a number of
-serial and network power switches to prevent a potentially faulty
-node from corrupting shared data.</p>
+the ttl value (1-255).</p>") +
+    _("<p>The <b>UDP port</b> sets the UDP port used for the unicast and
+broadcast media. Leave this at the default value (694)
+unless you are running multiple Heartbeat clusters over the same network
+segment, in which case you need to run each of them on a different port
+number.</p>
 ") +
-    _("<p>STONITH needs to know which nodes can access the power
- switch. Enter or select the name of the node in the Host from
- field. For a serial power switch, this is a specific node name.
- For a network power switch you should typically enter an asterisk
- (*) to indicate that it is accessible from all nodes.</p>
-") +
-    _("<p>The <b>STONITH Type</b> is the name of the module that
- is used to control the power switch. <b>Parameters</b> are
- specific to the module specified. See the <i>stonith -h</i>
- command line tool for a list of supported modules and
- the parameters they accept.</p>
+    _("<p>The <b>Baud Rate</b> controls the speed of the serial port if you are
+using a serial media. It is global for all serial
+interconnects.</p>
 "),
-
-    "startup_conf" : _("<p><b><big>Booting</big></b><br>
-To start the Heartbeat software each time this cluster server
-is booted, select <b>On</b>. If you select <b>Off</b>, you 
-must start Heartbeat manually each time this cluster server
-is booted. You can start the heartbeat server manually using
-the /etc/init.d/heartbeat start command</p>") +
-    _("<p><b><big>Switch On or Off</big></b><br>
-To start or stop the Heartbeat server immediately, click <b>Start Heartbeat
-Server Now</b> or <b>Stop Heartbeat Server Now</b>.</p>"),
-
+    
+    "auth_conf" : _("<p>Specify the <b>authentication method</b> to use for the network
+communication. This is very important to protect against network
+attacks.</p>
+") +
+    _("<p>Both <b>md5</b> and <b>sha1</b> require a <i>shared
+secret</i>, which is used to protect and authenticate the messages. The
+<b>crc</b> mechanism does not do message authentication and 
+only protects against corruption, not against attacks.</p>\n") +
+    _("<p>It is recommended to choose the <b>sha1</b> method, which is the
+    strongest authentication scheme available, and an appropriately strong
+    password. This must be exactly the same on all cluster
+    members.</p>
+"),
+    
     "resources_conf" : _("<p><b>Resources</b> -- specify which resources are handled by Heartbeat
 and how Heartbeat should handle failback (migration of resources back to
 a node after a failure has been resolved).</p>
@@ -162,6 +118,30 @@ example, <i>Filesystem::/dev/sda1::/mnt::reiserfs</i>. Check the
 documentation for the resource scripts.</p>
 "),
     
+    "stonith_conf" : _("<p>To protect the shared data, <b>STONITH</b> must be configured.
+Heartbeat is capable of driving a number of serial and network
+power switches to prevent a potentially faulty node from corrupting the
+shared data.</p>
+") +
+    _("<p>It needs to know which node can access the power switch. For a serial
+power switch, this is a specific node name. For a network power
+switch, typically enter a '*' to indicate that it is accessible from all
+nodes.</p>
+") +
+    _("<p>The <b>STONITH Type</b> must match the module name capable of
+controlling the power switch used.  The <b>Parameters</b>
+are also specific to the module. See the <i>stonith -h</i>
+command line tool for a listing of the supported modules and the
+parameters they accept.</p>
+"),
+
+    "startup_conf" : _("<p><b><big>Booting</big></b><br>
+To start the Heartbeat server every time your computer is booted, set
+<b>On</b>. Otherwise set <b>Off</b>.</p>") +
+    _("<p><b><big>Switch On or Off</big></b><br>
+To start or stop the Heartbeat server immediately, use <b>Start Heartbeat
+Server Now</b> or <b>Stop Heartbeat Server Now</b>.</p>"),
+
     "timeouts_conf": _("<p>Heartbeat uses a variety of timers to tune and configure its behavior.
 All timers are specified in seconds.</p>
 ") +

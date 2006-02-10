@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Feb 10 18:05:15 CET 2006 - lslezak@suse.cz
+
+- display current IP address
+- configure "autojoin" and "crm" keys
+- 2.13.3
+
+-------------------------------------------------------------------
 Fri Feb  3 12:28:37 CET 2006 - jjones@novell.com
 
 - Changed the order of the screens
