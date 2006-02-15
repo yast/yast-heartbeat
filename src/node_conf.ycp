@@ -40,7 +40,7 @@ void node_conf_Read()
 	if(ip!=nil && ip != "")thisnodeip=ip;
     });
 
-    foreach(string s, nodes, { if (s != thisnode) othernode = s; });
+//     foreach(string s, nodes, { if (s != thisnode) othernode = s; });
 }
 
 boolean node_conf_Write()
@@ -56,11 +56,11 @@ boolean node_conf_Write()
 // 	return false;
 //     }
     
-    list<string> onodes = Heartbeat::config["node"]:[];
-    if (size(onodes) != 2 || onodes[0]:"" != thisnode || onodes[1]:"" != newnode) {
-	Heartbeat::config["node"] = [ thisnode, newnode ];
-	Heartbeat::config["modified"] = true;
-    }
+//     list<string> onodes = Heartbeat::config["node"]:[];
+//     if (size(onodes) != 2 || onodes[0]:"" != thisnode || onodes[1]:"" != newnode) {
+// 	Heartbeat::config["node"] = nodes;
+// 	Heartbeat::config["modified"] = true;
+//     }
     
     return true;
 }
@@ -96,24 +96,24 @@ term node_conf_getDialog()
                     `VBox(
                         `VSpacing(1),
                         `VSquash(
-                            `PushButton(`id("add_stonith"), Label::AddButton())),
+                            `PushButton(`id("add_node"), Label::AddButton())),
 			`VSpacing(0.5),
 			`VSquash(
-			    `PushButton(`id("edit_stonith"), Label::EditButton())),
+			    `PushButton(`id("edit_node"), Label::EditButton())),
                         `VStretch()
                     )
                 )
             )),
 	    `HBox(
 		`HWeight( 9, 
-		    `Table(`id("stonith_table"), `opt(`notify),
+		    `Table(`id("node_table"), `opt(`notify),
 			`header("Node Name", "Node IP"))
 		),
 		`HWeight( 2,
 		    `VBox(
 			`VSpacing(1),
 			`VSquash(
-			    `PushButton(`id("delete_stonith"), Label::DeleteButton())),
+			    `PushButton(`id("delete_node"), Label::DeleteButton())),
 			`VStretch()
 		    )
 		)
@@ -126,10 +126,27 @@ any ConfigureNodeDialog () {
     node_conf_Read();
     
     my_SetContents("node_conf", node_conf_getDialog());
-    
+
+    list<string> nodes = Heartbeat::config["node"]:[];
+    nodes = filter(string s, (list<string>)nodes, { return s != thisnode; });
+    boolean modified = false;
+
     any ret = nil;
+    string curnode = nil;
     while(true) {
     
+ 	list inodes = maplist(string s, (list<string>)nodes, {
+ 	    return `item(`id(s), s, "");
+ 	});
+	UI::ChangeWidget(`id("node_table"), `Items, inodes);
+	if (curnode != nil && !contains(nodes, curnode)) curnode = nil;
+	if (curnode != nil) {
+	    UI::ChangeWidget(`id("node_table"), `CurrentItem, curnode);
+	}
+	
+	UI::ChangeWidget(`id("delete_node"), `Enabled, size(inodes)>0);
+	UI::ChangeWidget(`id("edit_node"), `Enabled, size(inodes)>0);
+	
 	Wizard::SelectTreeItem("node_conf");
 
 	ret = UI::UserInput();
@@ -144,12 +161,60 @@ any ConfigureNodeDialog () {
 	    continue;
 	}
 
+	curnode = (string)UI::QueryWidget(`id("node_table"), `CurrentItem);
+	
+	if (ret == "node_table") {
+	    if (curnode != nil) {
+// 		list l = regexptokenize(curnode, "([^ \t]*)[ \t]*([^ \t]*)[ \t]*(.*)");
+		UI::ChangeWidget(`id("othernode"), `Value, curnode);
+//  		UI::ChangeWidget(`id("othernodeip"), `Value, l[1]:"");
+// 		UI::ChangeWidget(`id("parameters"), `Value, l[2]:"");
+	    }
+	    continue;
+	}
+	
+	if (ret == "delete_node") {
+	    if (curnode != nil) {
+		nodes = filter(string s, (list<string>)nodes, { return s != curnode; });
+	    }
+	    modified = true;
+	    continue;
+	}
+	
+	if (ret == "add_node" || ret == "edit_node") {
+	    string nodename = (string)UI::QueryWidget(`id("othernode"), `Value);
+	    string nodeip = (string)UI::QueryWidget(`id("othernodeip"), `Value);
+	    if (nodename == "") {
+	        Report::Error(_("Specify the node name."));
+	        continue;
+	    }
+	    if (nodename == thisnode) {
+	        Report::Error(_("The specified node is already in the cluster."));
+	        continue;
+	    }
+// 	    string new = nodename + " " + nodeip;
+	    string new = nodename;
+	    if (ret == "edit_node") {
+	        nodes = filter(string s, (list<string>)nodes, { return s != curnode; });
+	    } else if (contains(nodes, new)) {
+	        Report::Error(_("The specified node is already in the cluster."));
+	        continue;
+	    }
+	    modified = true;
+	    if (ret == "edit_node") {
+	        nodes = filter(string s, (list<string>)nodes, { return s != curnode; });
+	    }
+	    curnode = new;
+	    nodes = add(nodes, curnode);
+	    continue;
+	}
+
 	if (ret == `wizardTree)
 	    ret = (string)UI::QueryWidget (`id (`wizardTree), `CurrentItem);
 
 	if (ret == `next || ret == `back || contains(DIALOG, (string)ret)) {
 	
-	    if (!node_conf_Write()) continue;
+// 	    if (!node_conf_Write()) continue;
 	    
 	    if (ret != `next && ret != `back)
 		ret = symbolof(toterm(ret));
@@ -158,6 +223,12 @@ any ConfigureNodeDialog () {
 	}
 
 	y2error("unexpected retcode: %1", ret);
+    }
+
+    if (modified) {
+	nodes = add(nodes, thisnode);
+	Heartbeat::config["node"] = nodes;
+	Heartbeat::config["modified"] = true;
     }
 
     return ret;
