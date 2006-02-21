@@ -86,9 +86,7 @@ term node_conf_getDialog()
                 `HWeight( 9,
                     `Frame(_("Add Nodes"),
                         `HBox(
-		            `Left(`TextEntry(`id("othernode"),_("Node Name"), othernode)),
-			    `HStretch(),
-		            `Left(`TextEntry(`id("othernodeip"),_("Node IP")))
+		            `Left(`TextEntry(`id("othernode"),_("Node Name"), othernode))
                         )
                     )
                 ),
@@ -107,7 +105,7 @@ term node_conf_getDialog()
 	    `HBox(
 		`HWeight( 9, 
 		    `Table(`id("node_table"), `opt(`notify),
-			`header("Node Name", "Node IP"))
+			`header("Node Name"))
 		),
 		`HWeight( 2,
 		    `VBox(
@@ -136,7 +134,7 @@ any ConfigureNodeDialog () {
     while(true) {
     
  	list inodes = maplist(string s, (list<string>)nodes, {
- 	    return `item(`id(s), s, "");
+ 	    return `item(`id(s), s);
  	});
 	UI::ChangeWidget(`id("node_table"), `Items, inodes);
 	if (curnode != nil && !contains(nodes, curnode)) curnode = nil;
@@ -165,10 +163,7 @@ any ConfigureNodeDialog () {
 	
 	if (ret == "node_table") {
 	    if (curnode != nil) {
-// 		list l = regexptokenize(curnode, "([^ \t]*)[ \t]*([^ \t]*)[ \t]*(.*)");
 		UI::ChangeWidget(`id("othernode"), `Value, curnode);
-//  		UI::ChangeWidget(`id("othernodeip"), `Value, l[1]:"");
-// 		UI::ChangeWidget(`id("parameters"), `Value, l[2]:"");
 	    }
 	    continue;
 	}
@@ -183,7 +178,6 @@ any ConfigureNodeDialog () {
 	
 	if (ret == "add_node" || ret == "edit_node") {
 	    string nodename = (string)UI::QueryWidget(`id("othernode"), `Value);
-	    string nodeip = (string)UI::QueryWidget(`id("othernodeip"), `Value);
 	    if (nodename == "") {
 	        Report::Error(_("Specify the node name."));
 	        continue;
@@ -192,7 +186,6 @@ any ConfigureNodeDialog () {
 	        Report::Error(_("The specified node is already in the cluster."));
 	        continue;
 	    }
-// 	    string new = nodename + " " + nodeip;
 	    string new = nodename;
 	    if (ret == "edit_node") {
 	        nodes = filter(string s, (list<string>)nodes, { return s != curnode; });
