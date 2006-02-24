@@ -105,7 +105,7 @@ void media_SetDialog(map media)
     term TPort = `HBox(
 	`HSquash(`Left(`TextEntry(`id("udpport"), _("UDP Port"), media["udpport"]:"694"))),
 	`HSpacing(2),
-	`HSquash(`Left(`ComboBox(`id("baud"), `opt(`editable), _("Baud Rate"), rates))),
+// 	`HSquash(`Left(`ComboBox(`id("baud"), `opt(`editable), _("Baud Rate"), rates))),
 	`HStretch());
 
     term TRadio = `RadioButtonGroup( `id ("media_type"), `VBox(
@@ -150,8 +150,7 @@ void media_SetDialog(map media)
 	    `PushButton(`id("delete_media"), `opt(`hstretch), Label::DeleteButton()),
 	    `VStretch())));
 	    
-/*    term contents = `VBox(TAdd, `VSpacing(0.5), TList, TPort);*/
-    term contents = `VBox(TAdd, `VSpacing(0.5), TList);
+    term contents = `VBox(TAdd, `VSpacing(0.5), TList, TPort);
 
     my_SetContents("media_conf",contents);
 

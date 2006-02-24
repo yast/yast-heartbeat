@@ -160,9 +160,19 @@ global boolean Read() {
 	config["apiauth"] = aa;
 
 	list rs = [];
-	rs = add(rs, "root /usr/lib/heartbeat/mgmtd -v");
+	map unamemap = (map)SCR::Execute(.target.bash_output, "uname -m");
+	string machine = deletechars(unamemap["stdout"]:"", "\n");
+	if (machine == "x86_64") {
+	    rs = add(rs, "root /usr/lib64/heartbeat/mgmtd -v");
+	} else {
+ 	    rs = add(rs, "root /usr/lib/heartbeat/mgmtd -v");
+	}
 	rs = add(rs, "root /sbin/evmsd");
 	config["respawn"] = rs;
+
+	list bc = [];
+	bc = add(bc, "eth0");
+	config["bcast"] = bc;
 
 	config["autojoin"] = "any";
 	config["crm"] = "true";
