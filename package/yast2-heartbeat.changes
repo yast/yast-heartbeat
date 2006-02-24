@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Feb 24 11:02:13 CET 2006 - jjones@novell.com
+
+- updated help text to correspond with screen changes
+- added a default for bcast, check for lib64 path of mgmtd,
+  put udpport back on media screen (#152595)
+- 2.13.5
+
+-------------------------------------------------------------------
 Thu Feb 23 09:04:01 CET 2006 - lslezak@suse.cz
 
 - .spec - removed yast2-devel-packages macro
