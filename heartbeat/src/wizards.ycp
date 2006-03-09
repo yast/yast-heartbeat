@@ -1,0 +1,155 @@
+/**
+ * Package:	Configuration of heartbeat
+ * Summary:	Wizards definitions
+ * Authors:	Martin Lazar <mlazar@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "heartbeat";
+
+import "Sequencer";
+import "Wizard";
+
+include "heartbeat/dialogs.ycp";
+include "heartbeat/common.ycp";
+
+map Aliases = $[
+    "startup_conf":	``(ConfigureStartUpDialog()),
+    "node_conf":	``(ConfigureNodeDialog()),
+    "media_conf":	``(ConfigureMediaDialog()),
+    "auth_conf":	``(ConfigureAuthDialog()),
+    "resources_conf":``(ConfigureResourcesDialog()),
+    "stonith_conf":	``(ConfigureStonithDialog()),
+    "timeouts_conf":	``(ConfigureTimeoutsDialog()),
+    "ipfail_conf":	``(ConfigureIpfailDialog()),
+    "group_conf":	``(ConfigurePingGroupDialog())
+];
+
+
+any TabSequence() {
+
+    map sequence = $[ "ws_start" : DIALOG[0]:"" ];
+    map anywhere = $[ `abort:`abort, `next:`next ];
+
+    foreach(string key, DIALOG, { anywhere = add(anywhere, symbolof(toterm(key)), key); });
+    foreach(string key, DIALOG, { sequence = add(sequence, key, anywhere); });
+    
+    // UI initialization
+    Wizard::OpenTreeNextBackDialog();
+
+    list<map> tree = [];
+    foreach(string key, DIALOG, { 
+	tree = Wizard::AddTreeItem( tree, PARENT[key]:"",  NAME[key]:"", key); }
+    );
+    
+    Wizard::CreateTree(tree, "");
+
+    // Buttons redefinition
+
+
+    Wizard::ReplaceNextButton(`PushButton(`id(`next), `opt(`key_F10), Label::FinishButton()));
+
+    if (UI::WidgetExists(`id(`wizardTree))) {
+	Wizard::ReplaceBackButton(`PushButton(`id(`help), `opt(`key_F1), Label::HelpButton()));
+	Wizard::ReplaceAbortButton(`PushButton(`id(`abort), `opt(`key_F9), Label::CancelButton()));
+    } else {
+	UI::WizardCommand(`SetNextButtonLabel( Label::FinishButton() ) );
+	UI::WizardCommand(`SetAbortButtonLabel( Label::CancelButton() ) );
+	Wizard::HideBackButton();
+    }
+    
+    Wizard::SelectTreeItem(sequence["ws_start"]:"");
+
+    any ret = Sequencer::Run(Aliases, sequence);
+
+    return ret;
+}
+
+any FirstRunSequence() {
+
+    map sequence = $[ 
+	"ws_start" : "node_conf",
+	"node_conf": $[ `next:"auth_conf", `back:"node_conf", `abort:`abort ],
+	"auth_conf": $[ `next:"media_conf", `back:"node_conf", `abort:`abort ],
+	"media_conf": $[ `next:"stonith_conf", `back:"media_conf", `abort:`abort ],
+	"stonith_conf": $[ `next:"startup_conf", `back:"media_conf", `abort:`abort ],
+	"startup_conf": $[ `next:`next, `back:"stonith_conf", `abort:`abort ]
+    ];
+	
+    any ret = Sequencer::Run(Aliases, sequence);
+
+    return ret;
+}
+
+any MainSequence() {
+
+    if (Heartbeat::firstrun) {
+	return FirstRunSequence();
+    } else {
+	return TabSequence();
+    }
+}
+
+/**
+ * Whole configuration of heartbeat
+ * @return sequence result
+ */
+any HeartbeatSequence() {
+
+    map aliases = $[
+	"read"	: [ ``( ReadDialog() ), true ],
+	"main"	: ``( MainSequence() ),
+	"write"	: [ ``( WriteDialog() ), true ]
+    ];
+    
+    map sequence = $[
+	"ws_start" : "read",
+	"read" : $[
+	    `abort	: `abort,
+	    `next	: "main"
+	],
+	"main" : $[
+	    `abort	: `abort,
+	    `next	: "write"
+	],
+	"write" : $[
+	    `abort	: `abort,
+	    `next	: `next
+	]
+    ];
+
+    Wizard::CreateDialog();
+
+    any ret = Sequencer::Run(aliases, sequence);
+
+    UI::CloseDialog();
+    return ret;
+}
+
+/**
+ * Whole configuration of heartbeat but without reading and writing.
+ * For use with autoinstallation.
+ * @return sequence result
+ */
+any HeartbeatAutoSequence() {
+
+    /* Initialization dialog caption */
+    string caption = _("Heartbeat Configuration");
+    /* Initialization dialog contents */
+    term contents = `Label(_("Initializing..."));
+
+    Wizard::CreateDialog();
+    Wizard::SetContentsButtons(caption, contents, "",
+	    Label::BackButton(), Label::NextButton());
+
+    any ret = TabSequence();
+
+    UI::CloseDialog();
+    return ret;
+}
+
+/* EOF */
+}

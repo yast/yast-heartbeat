@@ -1,0 +1,330 @@
+/**
+ * Package:	Configuration of heartbeat
+ * Authors:	Martin Lazar <mlazar@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "heartbeat";
+
+import "Label";
+import "Wizard";
+import "Heartbeat";
+import "Report";
+
+include "heartbeat/helps.ycp";
+include "heartbeat/common.ycp";
+
+list<string> nodes = [];
+
+map res_Read()
+{
+    map r = $[];
+
+    nodes = Heartbeat::config["node"]:[];
+    
+    string auto_failback = tolower(Heartbeat::config["auto_failback"]:"legacy");
+    if (auto_failback == "on" || auto_failback == "1" || auto_failback == "y" ||
+	auto_failback == "yes" || auto_failback == "true") {
+	auto_failback = "on";
+    } else if (auto_failback == "off" || auto_failback == "0" || auto_failback == "n" ||
+	auto_failback == "no" || auto_failback == "false") {
+	auto_failback = "off";
+    } else {
+	auto_failback = "legacy";
+    }
+    r["auto_failback"] = auto_failback;
+    
+    r["resources"] = [ Heartbeat::resources[nodes[0]:""]:[], Heartbeat::resources[nodes[1]:""]:[] ];
+    
+    return r;
+}
+
+boolean res_Write(map old, map new)
+{
+    foreach(integer n, [0, 1], {
+	if (!cmpList(old["resources",n]:[], new["resources",n]:[])) {
+    	    Heartbeat::resources_modified = true;
+	    string node = nodes[n]:"";
+	    Heartbeat::resources[node] = new["resources",n]:[];
+	};
+    });
+    
+    if (old["auto_failback"]:"" != new["auto_failback"]:"") {
+	Heartbeat::config["modified"] = true;
+	Heartbeat::config["auto_failback"] = tolower(new["auto_failback"]:"legacy");
+    }
+
+    return true;
+}
+
+integer res_getSelIndex(map r, integer n)
+{
+    string sel = (string)UI::QueryWidget(`id("node" + tostring(n)), `CurrentItem);
+    
+    integer i = size(r["resources",n]:[]);
+    while(i>=0) {
+	if (sel == r["resources", n, i]:"")
+	    return i;
+	i = i-1;
+    }
+    
+    return -1;
+}
+
+
+any res_updateOrder(map cur, integer n)
+{
+    integer i = res_getSelIndex(cur, n);
+    list r = cur["resources",n]:[];
+    
+    if (i<0) return 0;
+    
+    UI::ChangeWidget(`id("up" + tostring(n)), `Enabled, i>0);
+    UI::ChangeWidget(`id("down" + tostring(n)), `Enabled, i<size(r)-1);
+}
+
+any res_updateList(map r, integer n, string sel)
+{
+    string nid = "node" + tostring(n);
+    UI::ReplaceWidget(`id(nid+"_rp"), 
+    	`SelectionBox(`id(nid), `opt(`notify, `autoShortcut),
+	 nodes[n]:nid, r["resources",n]:[]));
+
+    if (sel != "" && sel != nil && contains(r["resources",n]:[], sel)) {
+	UI::ChangeWidget(`id(nid), `CurrentItem, sel);
+    }
+    
+    res_updateOrder(r, n);
+}
+
+
+any res_SetDialog(map r)
+{
+    list<string> nodes = Heartbeat::config["node"]:[];
+    integer i = -1;
+    list inodes = maplist(string s, nodes, { 
+	i = i + 1; 
+	return `item(`id("node" + tostring(i) + "_sel"), nodes[i]:"");
+    });
+    
+    term TAutoFailback = `HBox(`Left(`ComboBox(`id("auto_failback"), _("Automatic Failback"), [ "On", "Off", "Legacy" ])));
+    term TAddResources = `HBox(
+	`HWeight( 9, `Bottom(
+	    `Frame(_("Add Resource"),
+		`HBox(
+		    `ComboBox(`id("add_to_node"), _("Add to Node"), inodes ),
+		    `HSpacing(1),
+		    `TextEntry(`id("resource"), _("Resource")))))),
+	`HWeight( 2, `Bottom(
+	    `PushButton(`id("add_resource"), `opt(`hstretch), Label::AddButton()))));
+
+    term TList = `HBox(
+	`HBox(
+	    `ReplacePoint(`id("node0_rp"), `Empty()),
+	    `HSquash(`VBox( 
+		`VStretch(),
+		`PushButton(`id("delete0"), `opt(`hstretch), Label::DeleteButton()),
+		`VSpacing(1),
+		`PushButton(`id("up0"), `opt(`hstretch), Label::UpButton()),
+		`VSpacing(1),
+		`PushButton(`id("down0"), `opt(`hstretch), Label::DownButton())))),
+	`HSpacing(1),
+	`HBox(
+	    `ReplacePoint(`id("node1_rp"), `Empty()),
+	    `HSquash(`VBox( 
+		`VStretch(),
+		`PushButton(`id("delete1"), `opt(`hstretch), Label::DeleteButton()),
+		`VSpacing(1),
+		`PushButton(`id("up1"), `opt(`hstretch), Label::UpButton()),
+		`VSpacing(1),
+		`PushButton(`id("down1"),  `opt(`hstretch), Label::DownButton())))));
+		
+    term contents = `VBox( 
+	`VSquash( TAutoFailback), 
+	`VSpacing(0.5), 
+	`VSquash( TAddResources), 
+	`VSpacing(0.5), 
+	TList);
+
+    my_SetContents("resources_conf", contents);
+
+    if (r["auto_failback"]:"" == "legacy") {
+        UI::ChangeWidget(`id("auto_failback"), `Value, "Legacy");
+    } else if (r["auto_failback"]:"" == "on") {
+        UI::ChangeWidget(`id("auto_failback"), `Value, "On");
+    } else {
+        UI::ChangeWidget(`id("auto_failback"), `Value, "Off");
+    }
+    
+    res_updateList(r, 0, r["resources",0,0]:"");
+    res_updateList(r, 1, r["resources",1,0]:"");
+}
+
+void res_UpdateDialog(map r)
+{
+    foreach(integer n, [0, 1], {
+	boolean enab = size(r["resources",n]:[]) > 0;
+        UI::ChangeWidget(`id("delete" + tostring(n)), `Enabled, enab);
+	if (enab) {
+	    res_updateOrder(r, n);
+	} else {
+    	    UI::ChangeWidget(`id("up" + tostring(n)), `Enabled, enab);
+    	    UI::ChangeWidget(`id("down" + tostring(n)), `Enabled, enab);
+	}
+    });
+
+}
+
+map res_Current(map old)
+{
+    map new = old;
+    new["auto_failback"] = tolower((string)UI::QueryWidget(`id("auto_failback"), `Value));
+    return new;
+}
+
+map res_delete(map cur, integer n)
+{
+    string sel = (string)UI::QueryWidget(`id("node" + tostring(n)), `CurrentItem);
+    cur["resources",n] = filter(string s, cur["resources",n]:[], { return s != sel; });
+    return cur;
+}
+
+
+map res_updown(map cur, integer n, string direction)
+{
+    integer i = res_getSelIndex(cur, n);
+    list r = cur["resources", n]:[];
+    string sel = r[i]:"";
+    y2milestone("sel %1 %2", i, sel);
+    
+    if (i<0) return cur;
+    
+    if (direction == "up" && i>0) {
+        list nr = [];
+        while(i>1) {
+	    nr = add(nr, r[0]:"");
+	    r = remove(r, 0);
+	    i = i-1;
+	}
+	nr = add(nr, r[1]:"");
+	nr = merge(nr, remove(r, 1));
+	cur["resources",n] = nr;
+	res_updateList(cur, n, sel);
+    } else if (direction == "down" && i<size(r)-1) {
+        list nr = [];
+        while(i>0) {
+	    nr = add(nr, r[0]:"");
+	    r = remove(r, 0);
+	    i = i-1;
+	}
+	nr = add(nr, r[1]:"");
+	nr = merge(nr, remove(r, 1));
+	cur["resources",n] = nr;
+	res_updateList(cur, n, sel);
+    }
+    
+    return cur;
+}
+
+any ConfigureResourcesDialog() {
+
+    list<string> nodes = Heartbeat::config["node"]:[];
+    if (size(nodes) != 2) {
+	Report::Error(
+	    _("Heartbeat resource manager only supports two nodes.") + " " +
+	    _("Configure nodes first."));
+	return `node_conf;
+    }
+    
+    map old = res_Read();
+    map cur = old;
+
+    res_SetDialog(old);
+
+    any ret = nil;
+    while(true) {
+    
+    	Wizard::SelectTreeItem("resources_conf");
+
+	res_UpdateDialog(cur);
+	
+        ret = UI::UserInput();
+	
+	cur = res_Current(cur);
+	
+	if (ret == `help) {
+	    myHelp("timeouts_conf");
+	    continue;
+	}
+	
+        if (ret == `abort || ret == `cancel) {
+	    if (ReallyAbort()) return ret;
+	    else continue;
+	}
+
+	if (ret == `next || ret == `back || ret == `wizardTree || contains(DIALOG, tostring(ret))) {
+	
+	    if (!res_Write(old, cur)) continue;
+	    
+	    if (ret == `wizardTree)
+	        ret = (string)UI::QueryWidget (`id (`wizardTree), `CurrentItem);
+		
+	    if (ret != `next && ret != `back)
+		ret = symbolof(toterm(ret));
+
+	    break;
+	}
+
+	if (ret == "add_resource") {
+	    string res = (string)UI::QueryWidget(`id("resource"), `Value);
+	    string node = (string)UI::QueryWidget(`id("add_to_node"), `Value);
+	    integer n = tointeger(filterchars(node, "0123456789"));
+
+	    if (res == nil || res == "") {
+		Report::Error(_("Resource name is required."));
+	    } else if (contains(cur["resources",n]:[], res)) {
+		Report::Error (_("The specified resource is already present."));
+	    } else {
+		cur["resources",n] = add(cur["resources",n]:[], res);
+		res_updateList(cur, n, res);
+	    }
+	    continue;
+	}
+	
+	if (ret == "delete0") {
+	    cur = res_delete(cur, 0);
+	    res_updateList(cur, 0, cur["resources",0,0]:"");
+	    continue;
+	}
+
+	if (ret == "delete1") {
+	    cur = res_delete(cur, 1);
+	    res_updateList(cur, 1,  cur["resources",1,0]:"");
+	    continue;
+	}
+	
+	if (ret =="up0") { cur = res_updown(cur, 0, "up"); continue; }
+	if (ret =="up1") { cur = res_updown(cur, 1, "up"); continue; }
+	if (ret =="down0") { cur = res_updown(cur, 0, "down"); continue; }
+	if (ret =="down1") { cur = res_updown(cur, 1, "down"); continue; }
+	
+	if (ret == "node0") { res_updateOrder(cur, 0); continue; }
+	if (ret == "node1") { res_updateOrder(cur, 1); continue; }
+
+	y2error("unexpected retcode: %1", ret);
+
+    }
+    
+    
+    return ret;
+
+}
+
+
+/* EOF */
+}
+
+

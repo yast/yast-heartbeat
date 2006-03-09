@@ -1,0 +1,73 @@
+/**
+ * File:	clients/heartbeat.ycp
+ * Package:	Configuration of heartbeat
+ * Summary:	Main file
+ * Authors:	Martin Lazar <mlazar@suse.cz>
+ *
+ * $Id$
+ *
+ * Main file for heartbeat configuration. Uses all other files.
+ */
+
+{
+
+/***
+ * <h3>Configuration of heartbeat</h3>
+ */
+
+textdomain "heartbeat";
+
+/* The main () */
+y2milestone ("----------------------------------------");
+y2milestone ("Heartbeat module started");
+
+import "Progress";
+import "Report";
+import "Summary";
+
+import "CommandLine";
+include "heartbeat/wizards.ycp";
+
+map cmdline_description = $[
+    "id" 	: "heartbeat",
+    /* Command line help text for the Xheartbeat module */
+    "help"	: _("Configuration of Heartbeat"),
+    "guihandler"        : HeartbeatSequence,
+    "initialize"        : Heartbeat::Read,
+    "finish"            : Heartbeat::Write,
+    "actions"           : $[
+	// FIXME TODO: fill the functionality description here
+    ],
+    "options"		: $[
+	// FIXME TODO: fill the option descriptions here
+    ],
+    "mapping"		: $[
+	// FIXME TODO: fill the mappings of actions and options here
+    ]
+];
+
+/* is this proposal or not? */
+boolean propose = false;
+list args = WFM::Args();
+if(size(args) > 0) {
+    if(is(WFM::Args(0), path) && WFM::Args(0) == .propose) {
+        y2milestone("Using PROPOSE mode");
+        propose = true;
+    }
+}
+
+/* main ui function */
+any ret = nil;
+
+if(propose) ret = HeartbeatAutoSequence();
+else ret = CommandLine::Run(cmdline_description);
+y2debug("ret=%1", ret);
+
+/* Finish */
+y2milestone("Heartbeat module finished");
+y2milestone("----------------------------------------");
+
+return ret;
+
+/* EOF */
+}

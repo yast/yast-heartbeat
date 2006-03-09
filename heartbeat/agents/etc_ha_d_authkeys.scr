@@ -1,0 +1,21 @@
+/**
+ * File:	etc_ha_d_authkeys.scr
+ * Summary:	Agent for reading/writing /etc/ha.d/authkeys
+ * Access:	read/write
+ * Authors:	Martin Lazar <mlazar@suse.cz>
+ * See:		heartbeat(8)
+ *
+ * $Id$
+ */
+.etc.ha_d.authkeys
+
+`ag_ini(
+    `IniAgent( "/etc/ha.d/authkeys",
+	$[
+	    "options"	: [ "global_values", "flat" ],
+	    "comments"	: [ "^#.*", "^[ \t]*$" ],
+	    "params"	: [
+		$[ "match" : [ "^[ \t]*([^ \t]+)[ \t]+(.+)$", "%s %s" ] ]
+	    ]
+	]
+))
