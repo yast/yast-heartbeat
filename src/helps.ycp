@@ -42,9 +42,10 @@ Heartbeat software package must be installed on all nodes that will be
 part of your cluster.</p>") +
 
     _("<p>To add a node to the cluster, enter the name of the node
-and then click Add. Repeat this process for each
-node you want to add to the cluster. You can find node names for servers
-by entering the <i>uname -n</i> command on each node.</p>") +
+then click <b>Add</b>. Repeat this process for each
+node to add to the cluster. You can find node names for servers
+by entering the <tt>uname -n</tt> command on each node.</p>
+") +
 
  _("<p>If after adding a node to the cluster, you need to specify a 
 different node name for that node, double click the node you want
@@ -56,8 +57,8 @@ between cluster nodes. This provides a way for cluster nodes to signal
 that they are alive to other nodes in the cluster. For proper redundancy,
 you should specify more than one heartbeat medium if possible.</p>
 ") +
-    _("<p>Choose at least one <b>Heartbeat Medium</b>, and if possible,
- two or more. After specifying a heartbeat medium, click Add to add
+    _("<p>Choose at least one <b>Heartbeat Medium</b> and, if possible,
+ two or more. After specifying a heartbeat medium, click <b>Add</b> to add
 that medium type to Heartbeat.</p>
 ") +
 
@@ -66,8 +67,9 @@ devices in the device list.</p>
 ") +
 
     _("<p>For <b>multicast</b>, choose a network device, multicast
-group to join (class D multicast address 224.0.0.0 - 239.255.255.255) and
-the ttl value (1-255).</p>") +
+group to join (class D multicast address 224.0.0.0-239.255.255.255) and
+the ttl value (1-255).</p>
+") +
 
     _("<p><b>UDP Port</b> sets the UDP port that is used for the
 broadcast media. Leave this set to the default value (694)
@@ -78,16 +80,17 @@ number.</p>
 
     "auth_conf" : _("<p>Specify the authentication method to
  use for network communication between cluster nodes. Choosing
-an authentication method will protect against network attacks.</p>
+an authentication method protects against network attacks.</p>
 ") +
     _("<p>Both the <b>md5</b> and <b>sha1</b> methods require a
  <i>shared secret</i>, which is used to protect and authenticate
- messages. The <b>crc</b> method does not perform message authentication,
- and only protects against corruption, not against attacks.</p>\n") +
+ messages. The <b>crc</b> method does not perform message authentication
+ and only protects against corruption, not against attacks.</p>
+") +
 
     _("<p>The <b>sha1</b> method is recommended because it provides the
     strongest authentication scheme available. The authentication key
-(password) you specify will be used on all nodes in the cluster.</p>
+(password) specified is used on all nodes in the cluster.</p>
 "),    
     
     "resources_conf" : _("<p><b>Resources</b> -- specify which resources are handled by Heartbeat
@@ -135,14 +138,14 @@ serial and network power switches to prevent a potentially faulty
 node from corrupting shared data.</p>
 ") +
     _("<p>STONITH needs to know which nodes can access the power
- switch. Enter or select the name of the node in the Host from
- field. For a serial power switch, this is a specific node name.
- For a network power switch you should typically enter an asterisk
+ switch. Enter or select the name of the node in <b>Host From</b>.
+ For a serial power switch, this is a specific node name.
+ For a network power switch, you should typically enter an asterisk
  (*) to indicate that it is accessible from all nodes.</p>
 ") +
     _("<p>The <b>STONITH Type</b> is the name of the module that
  is used to control the power switch. <b>Parameters</b> are
- specific to the module specified. See the <i>stonith -h</i>
+ specific to the module specified. See the <tt>stonith -h</tt>
  command line tool for a list of supported modules and
  the parameters they accept.</p>
 "),
@@ -151,8 +154,9 @@ node from corrupting shared data.</p>
 To start the Heartbeat software each time this cluster server
 is booted, select <b>On</b>. If you select <b>Off</b>, you 
 must start Heartbeat manually each time this cluster server
-is booted. You can start the heartbeat server manually using
-the /etc/init.d/heartbeat start command</p>"),
+is booted. You can start the Heartbeat server manually using
+the <tt>/etc/init.d/heartbeat start</tt> command.</p>
+"),
 
     "timeouts_conf": _("<p>Heartbeat uses a variety of timers to tune and configure its behavior.
 All timers are specified in seconds.</p>
