@@ -61,7 +61,7 @@ any ConfigureStonithDialog () {
             )),
 	    `HBox(
 		`HWeight( 9, 
-		    `Table(`id("stonith_table"), `opt(`notify),
+		    `Table(`id("stonith_table"), `opt(`notify, `immediate),
 			`header("Host From", "Type", "Parameters"))
 		),
 		`HWeight( 2,
@@ -97,6 +97,14 @@ any ConfigureStonithDialog () {
 	UI::ChangeWidget(`id("delete_stonith"), `Enabled, size(istonith)>0);
 	UI::ChangeWidget(`id("edit_stonith"), `Enabled, size(istonith)>0);
 	
+	string selid = (string)UI::QueryWidget(`id("stonith_table"), `CurrentItem);
+	if (selid != nil) {
+	    list l = regexptokenize(selid, "([^ \t]*)[ \t]*([^ \t]*)[ \t]*(.*)");
+	    UI::ChangeWidget(`id("host"), `Value, l[0]:"");
+	    UI::ChangeWidget(`id("type"), `Value, l[1]:"");
+	    UI::ChangeWidget(`id("parameters"), `Value, l[2]:"");
+	}
+
         ret = UI::UserInput();
 
         if (ret == `abort || ret == `cancel) {
