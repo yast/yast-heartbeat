@@ -104,7 +104,7 @@ term node_conf_getDialog()
             )),
 	    `HBox(
 		`HWeight( 9, 
-		    `Table(`id("node_table"), `opt(`notify),
+		    `Table(`id("node_table"), `opt(`notify, `immediate),
 			`header("Node Name"))
 		),
 		`HWeight( 2,
@@ -146,6 +146,11 @@ any ConfigureNodeDialog () {
 	UI::ChangeWidget(`id("edit_node"), `Enabled, size(inodes)>0);
 	
 	Wizard::SelectTreeItem("node_conf");
+
+	string selnode = (string)UI::QueryWidget(`id("node_table"), `CurrentItem);
+	if (selnode != nil) {
+	    UI::ChangeWidget(`id("othernode"), `Value, selnode);
+	}
 
 	ret = UI::UserInput();
 
