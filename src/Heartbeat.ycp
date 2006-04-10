@@ -328,7 +328,7 @@ global boolean Write() {
     
     /* Restart services */
     if (!start_daemon) {
-//	Service::Stop("heartbeat");
+	Service::Stop("heartbeat");
         if (! Service::Disable("heartbeat")) {
 	    Report::Error(Service::Error());
         }
@@ -336,7 +336,7 @@ global boolean Write() {
 	if (! Service::Enable("heartbeat")) {
             Report::Error(Service::Error());
         }	
-//      Service::Restart("heartbeat");
+	Service::Restart("heartbeat");
     }
 
 
