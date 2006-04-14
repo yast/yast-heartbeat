@@ -43,12 +43,21 @@ any ConfigureStartUpDialog () {
 				`PushButton ( `id ( "stop_now" ),  `opt( `hstretch ), _("Stop Heartbeat Server Now") )
 			    ))));
 
+    term Tpropagate = `Frame ( _("Propagate Configuration"),
+		    `Left (
+			`HSquash (
+			    `VBox (
+				`VBox (
+				    `Left( `Label (_("To propagate this configuration to the rest of the nodes"))),
+				    `Left( `Label (_("please run the command line utility 'ha_propagate'")))
+				)
+			    ))));
     
     term contents = `Empty();
     if (Heartbeat::firstrun) {
-	contents = `VBox (`Top( Tbooting ));
+	contents = `VBox (Tbooting, `VSpacing(1), Tpropagate, `VStretch() );
     } else {
-	contents = `VBox (Tbooting, `VSpacing(1), Tonoff, `VStretch() );
+	contents = `VBox (Tbooting, `VSpacing(1), Tonoff, `VSpacing(1), Tpropagate, `VStretch() );
     }
 
 
