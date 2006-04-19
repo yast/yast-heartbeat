@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Apr 19 11:10:58 CEST 2006 - lslezak@suse.cz
+
+- fixed Edit button behaviour in the Media Config dialog (#156809)
+- properly detect network interfaces (#157276)
+- display redundancy warning message at proper time (#157296) 
+- 2.13.7
+
+-------------------------------------------------------------------
 Thu Mar  9 12:54:19 CET 2006 - lslezak@suse.cz
 
 - merged proofread texts
