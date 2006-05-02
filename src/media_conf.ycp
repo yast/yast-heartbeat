@@ -102,7 +102,7 @@ any media_syncEdits(map cur)
     string curid = (string)UI::QueryWidget(`id("configured_media_table"), `CurrentItem);
     list l = regexptokenize(curid, "([a-z]*).([0-9]*)");
     integer i = tointeger(l[1]:"0");
-    UI::ChangeWidget(`id("media_type"), `CurrentButton, "media_type_" + l[0]:"");
+    UI::ChangeWidget(`id("media_type"), `CurrentButton, "media_type_" + l[0]:"mcast");
     if (l[0]:"" == "bcast") {
 	UI::ChangeWidget(`id("bcast_device"), `Value, cur["bcast",i]:"");
     } else if (l[0]:"" == "mcast") {
@@ -140,7 +140,7 @@ void media_SetDialog(map media)
 // 	    `HSpacing(2),
 // 	    `ComboBox(`id("serial_port"), `opt(`editable), _("Serial Port Name"), serial_ports))),
 	`Left(`HBox(
-	    `RadioButton( `id ("media_type_bcast"), `opt(`notify, `immediate), _("Broadcast"), false),
+	    `RadioButton( `id ("media_type_bcast"), `opt(`notify), _("Broadcast"), false),
 	    `HSpacing(2),
 	    `ComboBox(`id("bcast_device"), `opt(`editable), _("Device"), net_devices))),
 // 	`Left(`HBox(
@@ -150,7 +150,7 @@ void media_SetDialog(map media)
 // 	    `HSpacing(1),
 // 	    `ComboBox(`id("ucast_device"), `opt(`editable), _("Device"), net_devices))),
 	`Left(`HBox(
-	    `RadioButton(`id("media_type_mcast"), `opt(`notify, `immediate), _("Multicast"), false),
+	    `RadioButton(`id("media_type_mcast"), `opt(`notify), _("Multicast"), false),
 	    `HSpacing(2),
 	    `TextEntry(`id("mcast_address"), _("Multicast Group"), "" ),
 	    `HSpacing(1),
@@ -308,8 +308,11 @@ any ConfigureMediaDialog () {
     while(true) {
 
 	Wizard::SelectTreeItem("media_conf");
-	
-	media_syncEdits(cur);
+
+ 	string curradio = (string)UI::QueryWidget(`id("media_type"), `CurrentButton);
+ 	if (curradio != "media_type_bcast" && curradio != "media_type_mcast") {
+ 	    media_syncEdits(cur);
+ 	}
 	media_UpdateDialog(cur);
 
 	ret = UI::UserInput();
