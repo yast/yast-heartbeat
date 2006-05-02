@@ -155,18 +155,18 @@ global boolean Read() {
 	firstrun = true;
 
 	list aa = [];
-	aa = add(aa, "mgmtd uid=hacluster,root");
+//	aa = add(aa, "mgmtd uid=hacluster,root");
 	aa = add(aa, "evms uid=hacluster,root");
 	config["apiauth"] = aa;
 
 	list rs = [];
-	map unamemap = (map)SCR::Execute(.target.bash_output, "uname -m");
-	string machine = deletechars(unamemap["stdout"]:"", "\n");
-	if (machine == "x86_64") {
-	    rs = add(rs, "root /usr/lib64/heartbeat/mgmtd -v");
-	} else {
- 	    rs = add(rs, "root /usr/lib/heartbeat/mgmtd -v");
-	}
+// 	map unamemap = (map)SCR::Execute(.target.bash_output, "uname -m");
+// 	string machine = deletechars(unamemap["stdout"]:"", "\n");
+// 	if (machine == "x86_64") {
+// 	    rs = add(rs, "root /usr/lib64/heartbeat/mgmtd -v");
+// 	} else {
+//  	    rs = add(rs, "root /usr/lib/heartbeat/mgmtd -v");
+// 	}
 	rs = add(rs, "root /sbin/evmsd");
 	config["respawn"] = rs;
 
