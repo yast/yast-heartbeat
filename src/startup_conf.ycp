@@ -48,8 +48,8 @@ any ConfigureStartUpDialog () {
 			`HSquash (
 			    `VBox (
 				`VBox (
-				    `Left( `Label (_("To propagate this configuration to the rest of the nodes"))),
-				    `Left( `Label (_("please run the command line utility 'ha_propagate'")))
+				    `Left( `Label (_("To propagate this configuration to the rest of the nodes,
+run the command line utility 'ha_propagate'.")))
 				)
 			    ))));
     

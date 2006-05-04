@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu May  4 15:20:49 CEST 2006 - lslezak@suse.cz
+
+- merged proofread texts
+- removed \r char in the help text, merged splitted label (#160626)
+- 2.13.9
+
+-------------------------------------------------------------------
 Tue May  2 12:34:09 MDT 2006 - jjones@novell.com
 
 - fixed radio button activation on Media Config dialog (#171261)

@@ -67,7 +67,7 @@ devices in the device list.</p>
 ") +
 
     _("<p>For <b>multicast</b>, choose a network device, multicast
-group to join (class D multicast address 224.0.0.0-239.255.255.255) and
+group to join (class D multicast address 224.0.0.0-239.255.255.255), and
 the ttl value (1-255).</p>
 ") +
 
