@@ -74,9 +74,8 @@ any FirstRunSequence() {
 	"ws_start" : "node_conf",
 	"node_conf": $[ `next:"auth_conf", `back:"node_conf", `abort:`abort ],
 	"auth_conf": $[ `next:"media_conf", `back:"node_conf", `abort:`abort ],
-	"media_conf": $[ `next:"stonith_conf", `back:"media_conf", `abort:`abort ],
-	"stonith_conf": $[ `next:"startup_conf", `back:"media_conf", `abort:`abort ],
-	"startup_conf": $[ `next:`next, `back:"stonith_conf", `abort:`abort ]
+	"media_conf": $[ `next:"startup_conf", `back:"media_conf", `abort:`abort ],
+	"startup_conf": $[ `next:`next, `back:"media_conf", `abort:`abort ]
     ];
 	
     any ret = Sequencer::Run(Aliases, sequence);

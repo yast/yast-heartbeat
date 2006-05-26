@@ -21,9 +21,9 @@ list<string> DIALOG = [
     "node_conf",
     "auth_conf",
     "media_conf",
-    "stonith_conf",
     "startup_conf"
 
+/*    "stonith_conf", */
 /*     "resources_conf", */
 /*     "timeouts_conf", */
 /*     "ipfail_conf", */
