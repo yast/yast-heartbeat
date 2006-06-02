@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jun  2 09:24:46 MDT 2006 - jjones@novell.com
+
+- Removed STONITH screen. (#179037)
+- Modified the way the ethernet devices list is built (#179320)
+
+-------------------------------------------------------------------
 Thu May  4 15:20:49 CEST 2006 - lslezak@suse.cz
 
 - merged proofread texts
