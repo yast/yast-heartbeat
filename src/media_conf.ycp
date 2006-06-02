@@ -118,14 +118,15 @@ void media_SetDialog(map media)
     list serial_ports = [ "/dev/ttyS0", "/dev/ttyS1", "/dev/ttyS2" ];
     list rates = ["19200", "38400", "57600", "115200"];
 
+    NetworkDevices::Read();
     list<string>devs=NetworkDevices::List("eth");
     list net_devices = [];
-    integer i=0;
     foreach(string dev, devs,
     {
- 	string mydev = NetworkDevices::device_name("eth", tostring(i));
-	i=i+1;
- 	net_devices = add(net_devices, mydev);
+	string ifcfg = "getcfg-interface " + dev;
+	map devmap = (map)SCR::Execute(.target.bash_output, ifcfg);
+	string tdev = deletechars(devmap["stdout"]:"", "\n");
+   	net_devices = add(net_devices, tdev);
     });
 
     term TPort = `HBox(
