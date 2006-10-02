@@ -49,7 +49,7 @@ any ConfigureStartUpDialog () {
 			    `VBox (
 				`VBox (
 				    `Left( `Label (_("To propagate this configuration to the rest of the nodes,
-run the command line utility 'ha_propagate'.")))
+run the command line utility ha_propagate.")))
 				)
 			    ))));
     
