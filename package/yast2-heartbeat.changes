@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Oct  2 16:32:22 CEST 2006 - lslezak@suse.cz
+
+- merged proofread messages
+- 2.13.11
+
+-------------------------------------------------------------------
 Fri Jun  2 09:24:46 MDT 2006 - jjones@novell.com
 
 - Removed STONITH screen. (#179037)

@@ -43,13 +43,14 @@ part of your cluster.</p>") +
 
     _("<p>To add a node to the cluster, enter the name of the node
 then click <b>Add</b>. Repeat this process for each
-node to add to the cluster. You can find node names for servers
+node to add to the cluster. Find node names for servers
 by entering the <tt>uname -n</tt> command on each node.</p>
 ") +
 
  _("<p>If after adding a node to the cluster, you need to specify a 
-different node name for that node, double click the node you want
-to edit, change the node name, and then click Edit.</p>"),
+different node name for that node, double-click the node 
+to edit, change the node name, then click <b>Edit</b>.</p>
+"),
 
     "media_conf" : _("<p><b>Heartbeat Media Configuration</b> lets you
  specify the method Heartbeat should use for internal communication
@@ -66,7 +67,7 @@ that medium type to Heartbeat.</p>
 devices in the device list.</p>
 ") +
 
-    _("<p>For <b>multicast</b>, choose a network device, multicast
+    _("<p>For <b>Multicast</b>, choose a network device, multicast
 group to join (class D multicast address 224.0.0.0-239.255.255.255), and
 the ttl value (1-255).</p>
 ") +
