@@ -13,7 +13,7 @@ import "Label";
 import "Wizard";
 import "Heartbeat";
 import "IP";
-import "NetworkDevices";
+import "NetworkInterfaces";
 
 include "heartbeat/helps.ycp";
 include "heartbeat/common.ycp";
@@ -118,8 +118,8 @@ void media_SetDialog(map media)
     list serial_ports = [ "/dev/ttyS0", "/dev/ttyS1", "/dev/ttyS2" ];
     list rates = ["19200", "38400", "57600", "115200"];
 
-    NetworkDevices::Read();
-    list<string>devs=NetworkDevices::List("eth");
+    NetworkInterfaces::Read();
+    list<string>devs=NetworkInterfaces::List("eth");
     list net_devices = [];
     foreach(string dev, devs,
     {

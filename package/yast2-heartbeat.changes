@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jan 24 14:21:19 CET 2008 - mzugec@suse.cz
+
+- replace deprecated NetworkDevices by NetworkInterfaces (from yast2)
+- 2.16.0
+
+-------------------------------------------------------------------
 Mon Mar 19 15:16:19 CET 2007 - lslezak@suse.cz
 
 - added missing translation mark (#180155)

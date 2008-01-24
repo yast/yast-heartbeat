@@ -13,7 +13,7 @@ import "Wizard";
 import "Heartbeat";
 import "Report";
 import "SCR";
-import "NetworkDevices";
+import "NetworkInterfaces";
 
 include "heartbeat/helps.ycp";
 include "heartbeat/common.ycp";
@@ -30,13 +30,13 @@ void node_conf_Read()
     thisnode = deletechars(unamemap["stdout"]:"", "\n");
 
     //read current settings for network
-    NetworkDevices::Read();
+    NetworkInterfaces::Read();
 
     //generate the map: static IP -> device
-    list<string>devs=NetworkDevices::Locate("BOOTPROTO","static");
+    list<string>devs=NetworkInterfaces::Locate("BOOTPROTO","static");
     foreach(string dev, devs,
     {
-	string ip=NetworkDevices::GetValue(dev,"IPADDR");
+	string ip=NetworkInterfaces::GetValue(dev,"IPADDR");
 	if(ip!=nil && ip != "")thisnodeip=ip;
     });
 
