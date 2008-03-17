@@ -69,7 +69,7 @@ critical split brain scenarios.
 	}
     });
 
-    string ha_cf = Heartbeat::ha_dir + "ha.cf";
+    string ha_cf = Heartbeat::ha_dir + "/" + "ha.cf";
     
     //foreach(string x, ["udpport", "baud"], {
     foreach(string x, [ "udpport" ], {
