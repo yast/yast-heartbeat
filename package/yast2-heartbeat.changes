@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Mar 14 15:36:58 CET 2008 - kmachalkova@suse.cz
+
+- Respect ha.cf file ordering (first udp port, then media) 
+  (bnc#235834)
+- 2.13.12
+
+-------------------------------------------------------------------
 Wed Jan 16 10:22:25 CET 2008 - kmachalkova@suse.cz
 
 - Merged proofread texts 
