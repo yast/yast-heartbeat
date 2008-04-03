@@ -1,0 +1,107 @@
+/**
+ * File:	include/heartbeat/commandline.ycp
+ * Package:	Configuration of HA
+ * Summary:	Command line handlers
+ * Authors:	Ladislav Slezak <lslezak@novell.com>
+ *
+ * $Id:$
+ */
+
+{
+    import "Heartbeat";
+    import "CommandLine";
+
+    textdomain "heartbeat";
+
+    /**
+     * Command line handler for List action: list available configurations
+     */
+    boolean ListHandler(map params)
+    {
+	y2debug("list params: %1", params);
+
+	// handle "list nodes" command
+	if (haskey(params, "nodes"))
+	{
+	    list<string> nodes = Heartbeat::config["node"]:[];
+	    foreach(string node, nodes,
+		{
+		    CommandLine::Print(node);
+		}
+	    );
+	}
+
+	return false; // = do not try to write
+    }
+
+    /**
+     * Command line handler for List action: list available configurations
+     */
+    boolean AddHandler(map params)
+    {
+	y2debug("add params: %1", params);
+
+	// handle "add node name='name'" command
+	if (haskey(params, "node") && haskey(params, "name"))
+	{
+	    list<string> nodes = Heartbeat::config["node"]:[];
+	    string name = params["name"]:"";
+
+	    if (name != "" && !contains(nodes, name))
+	    {
+		// add the specified node
+		nodes = add(nodes, name);
+		Heartbeat::config["node"] = nodes;
+		Heartbeat::config["modified"] = true;
+
+		// command line status message, %1 is name of the node
+		CommandLine::PrintVerbose(sformat(_("Added node '%1'"), name));
+
+		y2debug("New config: %1", Heartbeat::config);
+		return true;
+	    }
+	}
+
+	return false; // = do not try to write
+    }
+
+    boolean DeleteHandler(map params)
+    {
+	y2debug("delete params: %1", params);
+
+	// handle "delete node name='name'" command
+	if (haskey(params, "node") && haskey(params, "name"))
+	{
+	    list<string> nodes = Heartbeat::config["node"]:[];
+	    string name = params["name"]:"";
+
+	    if (name != "" && contains(nodes, name))
+	    {
+		// remove the specified node
+		nodes = filter(string node, nodes, {return node != name;});
+		Heartbeat::config["node"] = nodes;
+		Heartbeat::config["modified"] = true;
+
+		// command line status message, %1 is name of the node
+		CommandLine::PrintVerbose(sformat(_("Removed node '%1'"), name));
+
+		y2debug("New config: %1", Heartbeat::config);
+		return true;
+	    }
+	}
+
+	return false; // = do not try to write
+    }
+
+    boolean DoNotAbort()
+    {
+	return false;
+    }
+
+    boolean ReadHandler()
+    {
+	// register abort callback
+        Heartbeat::AbortFunction = DoNotAbort;
+	return Heartbeat::Read();
+    }
+}

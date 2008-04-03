@@ -17,6 +17,7 @@ ynclude_DATA =			\
 	media_conf.ycp		\
 	ipfail_conf.ycp		\
 	timeouts_conf.ycp	\
+	commandline.ycp		\
 	common.ycp
 
 

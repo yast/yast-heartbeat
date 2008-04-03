@@ -27,22 +27,68 @@ import "Summary";
 
 import "CommandLine";
 include "heartbeat/wizards.ycp";
+include "heartbeat/commandline.ycp";
 
 map cmdline_description = $[
     "id" 	: "heartbeat",
     /* Command line help text for the Xheartbeat module */
     "help"	: _("Configuration of Heartbeat"),
     "guihandler"        : HeartbeatSequence,
-    "initialize"        : Heartbeat::Read,
+    "initialize"        : ReadHandler,
     "finish"            : Heartbeat::Write,
     "actions"           : $[
-	// FIXME TODO: fill the functionality description here
+	// functionality description
+	"list"	: $[
+            "handler"   : ListHandler,
+            // translators: command line help text for add action
+            "help"      : _("List configured parameters."),
+	    // options
+            "options"   : [ "non_strict" ],
+            // help text for unknownd parameters
+            "non_strict_help" : _("Value of the specific module parameter."),
+	],
+	// functionality description
+	"add"	: $[
+            "handler"   : AddHandler,
+            // translators: command line help text for add action
+            "help"      : _("Add/configure a new parameter."),
+	    // options
+            "options"   : [ "non_strict" ],
+            // help text for unknownd parameters
+            "non_strict_help" : _("Value of the specific module parameter."),
+	],
+	// functionality description
+	"delete" : $[
+            "handler"   : DeleteHandler,
+            // translators: command line help text for add action
+            "help"      : _("Delete a configured parameter."),
+	    // options
+            "options"   : [ "non_strict" ],
+            // help text for unknownd parameters
+            "non_strict_help" : _("Value of the specific module parameter."),
+	],
     ],
+    // descriptions of options
     "options"		: $[
-	// FIXME TODO: fill the option descriptions here
+	"nodes" : $[
+            // translators: command line help text for the 'play' option
+            "help"      : _("List all configured nodes (including this node)."),
+        ],
+	"node" : $[
+            // translators: command line help text for the 'play' option
+            "help"      : _("List all configured nodes (including this node)."),
+        ],
+	"name" : $[
+            // translators: command line help text for the 'play' option
+            "help"      : _("List all configured nodes (including this node)."),
+	    "type"      : "string"
+        ],
     ],
+    // map options to commands
     "mapping"		: $[
-	// FIXME TODO: fill the mappings of actions and options here
+	"list" : ["nodes"],
+	"add"  : ["node", "name"],
+	"delete"  : ["node", "name"],
     ]
 ];
 
