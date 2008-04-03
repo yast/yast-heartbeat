@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Apr  3 11:01:32 CEST 2008 - kmachalkova@suse.cz
+
+- Added missing CloseDialog, to prevent hang (bnc#231834)
+  or failure to write configuration to ha.cf (bnc#309202)
+- 2.13.13 
+
+-------------------------------------------------------------------
 Fri Mar 14 15:36:58 CET 2008 - kmachalkova@suse.cz
 
 - Respect ha.cf file ordering (first udp port, then media) 
