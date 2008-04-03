@@ -65,6 +65,8 @@ any TabSequence() {
 
     any ret = Sequencer::Run(Aliases, sequence);
 
+    Wizard::CloseDialog();
+
     return ret;
 }
 
@@ -124,7 +126,7 @@ any HeartbeatSequence() {
 
     any ret = Sequencer::Run(aliases, sequence);
 
-    UI::CloseDialog();
+    Wizard::CloseDialog();
     return ret;
 }
 
@@ -146,7 +148,7 @@ any HeartbeatAutoSequence() {
 
     any ret = TabSequence();
 
-    UI::CloseDialog();
+    Wizard::CloseDialog();
     return ret;
 }
 
