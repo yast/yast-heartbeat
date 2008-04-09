@@ -38,8 +38,8 @@ map cmdline_description = $[
     "finish"            : Heartbeat::Write,
     "actions"           : $[
 	// functionality description
-	"list"	: $[
-            "handler"   : ListHandler,
+	"node"	: $[
+            "handler"   : NodeHandler,
             // translators: command line help text for add action
             "help"      : _("List configured parameters."),
 	    // options
@@ -47,21 +47,10 @@ map cmdline_description = $[
             // help text for unknownd parameters
             "non_strict_help" : _("Value of the specific module parameter."),
 	],
-	// functionality description
-	"add"	: $[
-            "handler"   : AddHandler,
+	"medium"	: $[
+            "handler"   : MediumHandler,
             // translators: command line help text for add action
-            "help"      : _("Add/configure a new parameter."),
-	    // options
-            "options"   : [ "non_strict" ],
-            // help text for unknownd parameters
-            "non_strict_help" : _("Value of the specific module parameter."),
-	],
-	// functionality description
-	"delete" : $[
-            "handler"   : DeleteHandler,
-            // translators: command line help text for add action
-            "help"      : _("Delete a configured parameter."),
+            "help"      : _("List configured parameters."),
 	    // options
             "options"   : [ "non_strict" ],
             // help text for unknownd parameters
@@ -70,11 +59,15 @@ map cmdline_description = $[
     ],
     // descriptions of options
     "options"		: $[
-	"nodes" : $[
+	"add" : $[
             // translators: command line help text for the 'play' option
             "help"      : _("List all configured nodes (including this node)."),
         ],
-	"node" : $[
+	"delete" : $[
+            // translators: command line help text for the 'play' option
+            "help"      : _("List all configured nodes (including this node)."),
+        ],
+	"list" : $[
             // translators: command line help text for the 'play' option
             "help"      : _("List all configured nodes (including this node)."),
         ],
@@ -83,12 +76,47 @@ map cmdline_description = $[
             "help"      : _("List all configured nodes (including this node)."),
 	    "type"      : "string"
         ],
+	"type" : $[
+            // translators: command line help text for the 'play' option
+            "help"      : _("List all configured nodes (including this node)."),
+	    "type"      : "string"
+        ],
+	"device" : $[
+            // translators: command line help text for the 'play' option
+            "help"      : _("List all configured nodes (including this node)."),
+	    "type"      : "string"
+        ],
+	"address" : $[
+            // translators: command line help text for the 'play' option
+            "help"      : _("List all configured nodes (including this node)."),
+	    "type"      : "string"
+        ],
+	"ttl" : $[
+            // translators: command line help text for the 'play' option
+            "help"      : _("List all configured nodes (including this node)."),
+	    "type"      : "integer"
+        ],
+	"udp" : $[
+            // translators: command line help text for the 'play' option
+            "help"      : _("List all configured nodes (including this node)."),
+	    "type"      : "integer"
+        ],
+	"method" : $[
+            // translators: command line help text for the 'play' option
+            "help"      : _("List all configured nodes (including this node)."),
+	    "type"      : "string"
+        ],
+	"key" : $[
+            // translators: command line help text for the 'play' option
+            "help"      : _("List all configured nodes (including this node)."),
+	    "type"      : "string"
+        ],
     ],
     // map options to commands
     "mapping"		: $[
-	"list" : ["nodes"],
-	"add"  : ["node", "name"],
-	"delete"  : ["node", "name"],
+	"node" : ["add", "delete", "list", "name"],
+	"medium" : ["add", "delete", "list", "type", "device", "address", "ttl", "set", "udp"],
+	"authentication" : ["set", "list", "method", "key"],
     ]
 ];
 

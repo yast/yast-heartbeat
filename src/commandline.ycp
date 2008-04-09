@@ -13,84 +13,280 @@
 
     textdomain "heartbeat";
 
+    // default values
+    const integer default_udp_port = 694;
+    const string default_udp_port_str = tostring(default_udp_port);
+
+    const integer default_ttl = 2;
+    const string default_ttl_str = tostring(default_ttl);
+
     /**
      * Command line handler for List action: list available configurations
      */
-    boolean ListHandler(map params)
+    boolean ListNodes()
     {
-	y2debug("list params: %1", params);
+	list<string> nodes = Heartbeat::config["node"]:[];
+	foreach(string node, nodes,
+	    {
+		CommandLine::Print(node);
+	    }
+	);
 
-	// handle "list nodes" command
-	if (haskey(params, "nodes"))
+	return false; // = do not try to write
+    }
+
+    /**
+     * Command line handler for List action: list available configurations
+     */
+    boolean AddNode(string name)
+    {
+	list<string> nodes = Heartbeat::config["node"]:[];
+
+	if (name != "" && !contains(nodes, name))
 	{
-	    list<string> nodes = Heartbeat::config["node"]:[];
-	    foreach(string node, nodes,
+	    // add the specified node
+	    nodes = add(nodes, name);
+	    Heartbeat::config["node"] = nodes;
+	    Heartbeat::config["modified"] = true;
+
+	    // command line status message, %1 is name of the node
+	    CommandLine::PrintVerbose(sformat(_("Added node '%1'"), name));
+
+	    y2debug("New config: %1", Heartbeat::config);
+	    return true;
+	}
+
+	return false; // = do not try to write
+    }
+
+    boolean DeleteNode(string name)
+    {
+	list<string> nodes = Heartbeat::config["node"]:[];
+
+	if (name != "" && contains(nodes, name))
+	{
+	    // remove the specified node
+	    nodes = filter(string node, nodes, {return node != name;});
+	    Heartbeat::config["node"] = nodes;
+	    Heartbeat::config["modified"] = true;
+
+	    // command line status message, %1 is name of the node
+	    CommandLine::PrintVerbose(sformat(_("Removed node '%1'"), name));
+
+	    y2debug("New config: %1", Heartbeat::config);
+	    return true;
+	}
+
+	return false; // = do not try to write
+    }
+
+
+    /**
+     * Command line handler for List action: list available configurations
+     */
+    boolean NodeHandler(map params)
+    {
+	if (haskey(params, "list"))
+	{
+	    return ListNodes();
+	}
+
+	string name = params["name"]:"";
+
+	if (name != "")
+	{
+	    if (haskey(params, "add"))
+	    {
+		return AddNode(name);
+	    }
+	    else if (haskey(params, "delete"))
+	    {
+		return DeleteNode(name);
+	    }
+	}
+	else
+	{
+	    CommandLine::Print("ERROR: Missing or empty 'name' option!");
+	}
+
+	return false;
+    }
+
+    boolean ListMedia()
+    {
+	list<string> bcast = Heartbeat::config["bcast"]:[];
+	list<string> mcast = Heartbeat::config["mcast"]:[];
+
+	foreach(string d, bcast,
+	    {
+		CommandLine::Print(sformat(_("Broadcast device: %1"), d));
+	    }
+	);
+
+	foreach(string d, mcast,
+	    {
+		list<string> options = splitstring(d, " ");
+
+		options =  filter(string optn, options, {return optn != nil && optn != "";});
+
+		CommandLine::Print(sformat(_("Multicast device: %1, adress: %2, UDP: %3, TTL: %4"),
+		    options[0]:"", options[1]:"", options[2]:"", options[3]:""));
+	    }
+	);
+
+	return false;
+    }
+
+    boolean GetUDP()
+    {
+	string udpport = Heartbeat::config["udpport"]:default_udp_port_str;
+	CommandLine::Print(udpport);
+	return false;
+    }
+
+    boolean SetUDP(integer udpport)
+    {
+	string current_udpport = Heartbeat::config["udpport"]:default_udp_port_str;
+	string udpport_str = tostring(udpport);
+
+	if (udpport_str != current_udpport)
+	{
+	    CommandLine::PrintVerbose(sformat(_("Setting UDP port to %1"), udpport_str));
+	    Heartbeat::config["modified"] = true;
+	    Heartbeat::config["udpport"] = udpport_str;
+	    return true;
+	}
+
+	return false;
+    }
+
+    string MCastDeviceString(string device, string address, integer ttl, integer udp)
+    {
+	return device + " " + address + " " + tostring(udp) + " " + tostring(ttl) + " 0";
+    }
+
+    boolean AddMedium(string type, string device, string address, integer ttl, integer udp)
+    {
+	if (type == "bcast")
+	{
+	    list<string> bcast_devices = Heartbeat::config["bcast"]:[];
+
+	    if (!contains(bcast_devices, device))
+	    {
+		Heartbeat::config["modified"] = true;
+		Heartbeat::config["bcast"] = add(bcast_devices, device);
+		return true;
+	    }
+	}
+	else if (type == "mcast")
+	{
+	    string medium = MCastDeviceString(device, address, ttl, udp);
+	    list<string> mcast_devices = Heartbeat::config["bcast"]:[];
+
+	    if (!contains(mcast_devices, medium))
+	    {
+		Heartbeat::config["modified"] = true;
+		Heartbeat::config["mcast"] = add(mcast_devices, medium);
+		return true;
+	    }
+	}
+
+	return false;
+    }
+
+    boolean DeleteMedium(string type, string device, string address, integer ttl, integer udp)
+    {
+	if (type == "bcast")
+	{
+	    list<string> bcast_devices = Heartbeat::config["bcast"]:[];
+
+	    if (contains(bcast_devices, device))
+	    {
+		Heartbeat::config["modified"] = true;
+		Heartbeat::config["bcast"] = filter(string dev, bcast_devices, {return dev != device;});
+		return true;
+	    }
+	}
+	else if (type == "mcast")
+	{
+	    string medium = MCastDeviceString(device, address, ttl, udp);
+	    list<string> mcast_devices = Heartbeat::config["mcast"]:[];
+
+	    if (contains(mcast_devices, medium))
+	    {
+		Heartbeat::config["modified"] = true;
+		Heartbeat::config["mcast"] = filter(string dev, mcast_devices, {return dev != medium;});
+		return true;
+	    }
+	}
+
+	return false;
+    }
+
+    /**
+     * Command line handler for List action: list available configurations
+     */
+    boolean MediumHandler(map params)
+    {
+	if (haskey(params, "list"))
+	{
+	    return ListMedia();
+	}
+
+	if (haskey(params, "set"))
+	{
+	    if (haskey(params, "udp"))
+	    {
+		integer udp = tointeger(params["udp"]:default_udp_port_str);
+
+		if (udp != nil && udp > 0 && udp < 65536)
 		{
-		    CommandLine::Print(node);
+		    return SetUDP(udp);
 		}
-	    );
-	}
-
-	return false; // = do not try to write
-    }
-
-    /**
-     * Command line handler for List action: list available configurations
-     */
-    boolean AddHandler(map params)
-    {
-	y2debug("add params: %1", params);
-
-	// handle "add node name='name'" command
-	if (haskey(params, "node") && haskey(params, "name"))
-	{
-	    list<string> nodes = Heartbeat::config["node"]:[];
-	    string name = params["name"]:"";
-
-	    if (name != "" && !contains(nodes, name))
-	    {
-		// add the specified node
-		nodes = add(nodes, name);
-		Heartbeat::config["node"] = nodes;
-		Heartbeat::config["modified"] = true;
-
-		// command line status message, %1 is name of the node
-		CommandLine::PrintVerbose(sformat(_("Added node '%1'"), name));
-
-		y2debug("New config: %1", Heartbeat::config);
-		return true;
+		else
+		{
+		    CommandLine::Print(_("Missing or invalid 'udp' option"));
+		}
 	    }
+
+	    return false;
 	}
 
-	return false; // = do not try to write
-    }
-
-    boolean DeleteHandler(map params)
-    {
-	y2debug("delete params: %1", params);
-
-	// handle "delete node name='name'" command
-	if (haskey(params, "node") && haskey(params, "name"))
+	if (haskey(params, "get"))
 	{
-	    list<string> nodes = Heartbeat::config["node"]:[];
-	    string name = params["name"]:"";
-
-	    if (name != "" && contains(nodes, name))
+	    if (haskey(params, "udp"))
 	    {
-		// remove the specified node
-		nodes = filter(string node, nodes, {return node != name;});
-		Heartbeat::config["node"] = nodes;
-		Heartbeat::config["modified"] = true;
-
-		// command line status message, %1 is name of the node
-		CommandLine::PrintVerbose(sformat(_("Removed node '%1'"), name));
-
-		y2debug("New config: %1", Heartbeat::config);
-		return true;
+		return GetUDP();
 	    }
+
+	    return false;
 	}
 
-	return false; // = do not try to write
+	string device = params["device"]:"";
+	string address = params["address"]:"";
+	string type = params["type"]:"";
+	integer ttl = tointeger(params["ttl"]:default_ttl_str);
+	integer udp = tointeger(params["udp"]:default_udp_port_str);
+
+	if (ttl == nil || udp == nil || device == nil || device == "")
+	{
+	    return false;
+	}
+
+	if (haskey(params, "add"))
+	{
+	    return AddMedium(type, device, address, ttl, udp);
+	}
+	else if (haskey(params, "delete"))
+	{
+	    return DeleteMedium(type, device, address, ttl, udp);
+	}
+	else
+	{
+	    CommandLine::Print("ERROR: Missing or invalid command option!");
+	}
+
+	return false;
     }
 
     boolean DoNotAbort()
