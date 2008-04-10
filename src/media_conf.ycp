@@ -130,7 +130,7 @@ void media_SetDialog(map media)
     });
 
     term TPort = `HBox(
-	`HSquash(`Left(`TextEntry(`id("udpport"), _("UDP Port"), media["udpport"]:"694"))),
+	`HSquash(`Left(`InputField(`id("udpport"), _("UDP Port"), media["udpport"]:"694"))),
 	`HSpacing(2),
 // 	`HSquash(`Left(`ComboBox(`id("baud"), `opt(`editable), _("Baud Rate"), rates))),
 	`HStretch());
@@ -153,7 +153,7 @@ void media_SetDialog(map media)
 	`Left(`HBox(
 	    `RadioButton(`id("media_type_mcast"), `opt(`notify), _("Multicast"), false),
 	    `HSpacing(2),
-	    `TextEntry(`id("mcast_address"), _("Multicast Group"), "" ),
+	    `InputField(`id("mcast_address"), `opt(`hstretch), _("Multicast Group"), "" ),
 	    `HSpacing(1),
 	    `ComboBox(`id("mcast_device"), `opt(`editable), _("Device"), net_devices),
 	    `HSpacing(1),

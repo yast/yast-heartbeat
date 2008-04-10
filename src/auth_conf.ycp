@@ -37,7 +37,7 @@ term auth_conf_GetDialog()
 			    `Left(`RadioButton(`id("md5"), `opt(`notify), _("MD5")))
 			)
 		    ),
-		    `TextEntry(`id("authkey"), _("Authentication Key"), password)
+		    `InputField(`id("authkey"), `opt(`hstretch), _("Authentication Key"), password)
 		)
 	    ),
 	    `VStretch()

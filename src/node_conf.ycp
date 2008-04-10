@@ -86,7 +86,7 @@ term node_conf_getDialog()
                 `HWeight( 9,
                     `Frame(_("Add Nodes"),
                         `HBox(
-		            `Left(`TextEntry(`id("othernode"),_("Node Name"), othernode))
+		            `Left(`InputField(`id("othernode"), `opt(`hstretch), _("Node Name"), othernode))
                         )
                     )
                 ),

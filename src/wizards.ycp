@@ -65,6 +65,8 @@ any TabSequence() {
 
     any ret = Sequencer::Run(Aliases, sequence);
 
+    Wizard::CloseDialog();
+
     return ret;
 }
 
