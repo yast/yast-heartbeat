@@ -289,6 +289,111 @@
 	return false;
     }
 
+    boolean ListAuth()
+    {
+	string method = Heartbeat::authkeys["method"]:"";
+	string password = Heartbeat::authkeys["password"]:"";
+
+	CommandLine::Print(sformat(_("Authentication method: %1"), method));
+
+	if (method == "sha1" || method == "md5")
+	{
+	    CommandLine::Print(sformat(_("Authentication key: %1"), password));
+	}
+
+	return false;
+    }
+
+    boolean SetAuth(string method, string key)
+    {
+	if (!contains(["crc", "md5", "sha1"], method))
+	{
+	    // invalid method
+	    return false;
+	}
+
+	string curr_method = Heartbeat::authkeys["method"]:"";
+	string curr_key = Heartbeat::authkeys["password"]:"";
+
+	if (method != curr_method || key != curr_key)
+	{
+	    Heartbeat::authkeys["method"] = method;
+
+	    if (method == "sha1" || method == "md5")
+	    {
+		Heartbeat::authkeys["password"] = key;
+	    }
+	    else
+	    {
+		Heartbeat::authkeys["password"] = "";
+	    }
+
+	    Heartbeat::config["modified"] = true;
+
+	    return true;
+	}
+
+	return false;
+    }
+
+    boolean AuthHandler(map params)
+    {
+	if (haskey(params, "list"))
+	{
+	    return ListAuth();
+	}
+
+	if (haskey(params, "set"))
+	{
+	    string method = params["method"]:"";
+	    string key = params["key"]:"";
+
+	    return SetAuth(method, key);
+	}
+
+	return false;
+    }
+
+    boolean StartStatus()
+    {
+	// %1 is "enabled" or "disabled"
+	CommandLine::Print(sformat(_("Start Heartbeat service at boot: %1"),
+	    // Automatic start at boot is either "enableb" or "disabled"
+	    Heartbeat::start_daemon ? _("enabled") : _("disabled")));
+	return false;
+    }
+
+    boolean EnableAutoStart(boolean start)
+    {
+	if (start != Heartbeat::start_daemon)
+	{
+	    Heartbeat::start_daemon_modified = true;
+	    Heartbeat::start_daemon = start;
+
+	    return true;
+	}
+
+	return false;
+    }
+
+    boolean StartHandler(map params)
+    {
+	if (haskey(params, "status"))
+	{
+	    return StartStatus();
+	}
+	else if (haskey(params, "enable"))
+	{
+	    return EnableAutoStart(true);
+	}
+	else if (haskey(params, "disable"))
+	{
+	    return EnableAutoStart(false);
+	}
+
+	return false;
+    }
+
     boolean DoNotAbort()
     {
 	return false;

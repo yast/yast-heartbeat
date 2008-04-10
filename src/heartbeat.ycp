@@ -21,18 +21,16 @@ textdomain "heartbeat";
 y2milestone ("----------------------------------------");
 y2milestone ("Heartbeat module started");
 
-import "Progress";
-import "Report";
-import "Summary";
-
 import "CommandLine";
+import "Report";
+
 include "heartbeat/wizards.ycp";
 include "heartbeat/commandline.ycp";
 
 map cmdline_description = $[
     "id" 	: "heartbeat",
-    /* Command line help text for the Xheartbeat module */
-    "help"	: _("Configuration of Heartbeat"),
+    /* Command line help text for the Heartbeat module */
+    "help"	: _("Configuration of high availability (HA) cluster using Heartbeat service."),
     "guihandler"        : HeartbeatSequence,
     "initialize"        : ReadHandler,
     "finish"            : Heartbeat::Write,
@@ -41,82 +39,101 @@ map cmdline_description = $[
 	"node"	: $[
             "handler"   : NodeHandler,
             // translators: command line help text for add action
-            "help"      : _("List configured parameters."),
-	    // options
-            "options"   : [ "non_strict" ],
-            // help text for unknownd parameters
-            "non_strict_help" : _("Value of the specific module parameter."),
+            "help"      : _("Configure list of the servers for the cluster"),
 	],
 	"medium"	: $[
             "handler"   : MediumHandler,
             // translators: command line help text for add action
-            "help"      : _("List configured parameters."),
-	    // options
-            "options"   : [ "non_strict" ],
-            // help text for unknownd parameters
-            "non_strict_help" : _("Value of the specific module parameter."),
+            "help"      : _("Set the communication between the nodes of the cluster."),
+	],
+	"authentication"	: $[
+            "handler"   : AuthHandler,
+            // translators: command line help text for add action
+            "help"      : _("Configure authentication of the nodes."),
+	],
+	"start"	: $[
+            "handler"   : StartHandler,
+            // translators: command line help text for add action
+            "help"      : _("Configure automatic start of the service at boot."),
 	],
     ],
     // descriptions of options
     "options"		: $[
 	"add" : $[
             // translators: command line help text for the 'play' option
-            "help"      : _("List all configured nodes (including this node)."),
+            "help"      : _("Add a new item to the list."),
         ],
 	"delete" : $[
             // translators: command line help text for the 'play' option
-            "help"      : _("List all configured nodes (including this node)."),
+            "help"      : _("Delete an item from the list."),
         ],
 	"list" : $[
             // translators: command line help text for the 'play' option
-            "help"      : _("List all configured nodes (including this node)."),
+            "help"      : _("Display the configuration."),
         ],
 	"name" : $[
             // translators: command line help text for the 'play' option
-            "help"      : _("List all configured nodes (including this node)."),
+            "help"      : _("Name of the node in the cluster."),
 	    "type"      : "string"
         ],
 	"type" : $[
             // translators: command line help text for the 'play' option
-            "help"      : _("List all configured nodes (including this node)."),
+            "help"      : _("Communication mode, can be 'bcast' for broadcast or 'mcast' for multicat."),
 	    "type"      : "string"
         ],
 	"device" : $[
             // translators: command line help text for the 'play' option
-            "help"      : _("List all configured nodes (including this node)."),
+            "help"      : _("Network device (e.g. eth0) used for communication."),
 	    "type"      : "string"
         ],
 	"address" : $[
             // translators: command line help text for the 'play' option
-            "help"      : _("List all configured nodes (including this node)."),
+            "help"      : _("IP address of the multicats group (224.0.0.0 - 239.255.255.255)."),
 	    "type"      : "string"
         ],
 	"ttl" : $[
             // translators: command line help text for the 'play' option
-            "help"      : _("List all configured nodes (including this node)."),
+            "help"      : _("TTL value (1-255, default is 2)."),
 	    "type"      : "integer"
         ],
 	"udp" : $[
             // translators: command line help text for the 'play' option
-            "help"      : _("List all configured nodes (including this node)."),
+            "help"      : _("UDP port number (default is 694)."),
 	    "type"      : "integer"
         ],
 	"method" : $[
             // translators: command line help text for the 'play' option
-            "help"      : _("List all configured nodes (including this node)."),
+            "help"      : _("Authentication method, can be 'crc' (no security), 'sha1' or 'md5'."),
 	    "type"      : "string"
         ],
 	"key" : $[
             // translators: command line help text for the 'play' option
-            "help"      : _("List all configured nodes (including this node)."),
+            "help"      : _("The authentication key."),
 	    "type"      : "string"
+        ],
+	"enable" : $[
+            // translators: command line help text for the 'play' option
+            "help"      : _("Enable automatic start of the service at boot."),
+        ],
+	"disable" : $[
+            // translators: command line help text for the 'play' option
+            "help"      : _("Disable automatic start of the service at boot."),
+        ],
+	"set" : $[
+            // translators: command line help text for the 'play' option
+            "help"      : _("Set the configuration."),
+        ],
+	"status" : $[
+            // translators: command line help text for the 'play' option
+            "help"      : _("Print status of the automatic start at boot."),
         ],
     ],
     // map options to commands
-    "mapping"		: $[
+    "mappings"		: $[
 	"node" : ["add", "delete", "list", "name"],
 	"medium" : ["add", "delete", "list", "type", "device", "address", "ttl", "set", "udp"],
 	"authentication" : ["set", "list", "method", "key"],
+	"start" : [ "status", "enable", "disable"],
     ]
 ];
 

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Apr 10 11:19:44 CEST 2008 - lslezak@suse.cz
+
+- implemented command line mode support (fate#120045)
+
+-------------------------------------------------------------------
 Mon Mar 17 12:43:32 CET 2008 - jsrain@suse.cz
 
 - added 'StartupNotify=true' to the desktop file (bnc #304964)
