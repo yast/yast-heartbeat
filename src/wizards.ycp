@@ -50,17 +50,20 @@ any TabSequence() {
     // Buttons redefinition
 
 
-    Wizard::SetNextButton(`PushButton(`id(`next), `opt(`key_F10), Label::FinishButton()));
+    Wizard::SetNextButton(`next, Label::FinishButton());
 
     if (UI::WidgetExists(`id(`wizardTree))) {
-	Wizard::SetBackButton(`PushButton(`id(`help), `opt(`key_F1), Label::HelpButton()));
-	Wizard::SetAbortButton(`PushButton(`id(`abort), `opt(`key_F9), Label::CancelButton()));
+	//we should probably not use `help ID here
+	//`help button is defined within Wizard standard bottom button box
+	//Wizard::SetBackButton((`help, Label::HelpButton()));
+	Wizard::SetAbortButton(`abort, Label::CancelButton());
     } else {
 	UI::WizardCommand(`SetNextButtonLabel( Label::FinishButton() ) );
 	UI::WizardCommand(`SetAbortButtonLabel( Label::CancelButton() ) );
-	Wizard::HideBackButton();
     }
-    
+    //rather, always hide back button
+    Wizard::HideBackButton();
+
     Wizard::SelectTreeItem(sequence["ws_start"]:"");
 
     any ret = Sequencer::Run(Aliases, sequence);
