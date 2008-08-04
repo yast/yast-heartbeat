@@ -10,6 +10,8 @@
 textdomain "heartbeat";
 
 import "Label";
+import "FileUtils";
+import "Report";
 import "Wizard";
 import "Heartbeat";
 import "IP";
@@ -66,9 +68,14 @@ critical split brain scenarios.
 	    Heartbeat::config[cast] = new[cast]:[];
 	}
     });
+
+    string ha_cf = Heartbeat::ha_dir + "/" + "ha.cf";
     
-    foreach(string x, ["udpport", "baud"], {
-	if (old[x]:"" != new[x]:"") {
+    //foreach(string x, ["udpport", "baud"], {
+    foreach(string x, [ "udpport" ], {
+	if (old[x]:"" != new[x]:"" || !FileUtils::Exists( ha_cf ) ){
+	    //set as modified also if ha.cf does not exist yet
+	    //so the data get written (#235834)
 	    Heartbeat::config["modified"] = true;
 	    Heartbeat::config[x] = new[x]:"";
 	}

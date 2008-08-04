@@ -47,9 +47,8 @@ node to add to the cluster. Find node names for servers
 by entering the <tt>uname -n</tt> command on each node.</p>
 ") +
 
- _("<p>If after adding a node to the cluster, you need to specify a 
-different node name for that node, double-click the node 
-to edit, change the node name, then click <b>Edit</b>.</p>
+ _("<p>If you need to specify a different node name after adding a node to the cluster,
+double-click the node to edit, change its name, then click <b>Edit</b>.</p>
 "),
 
     "media_conf" : _("<p><b>Heartbeat Media Configuration</b> lets you
