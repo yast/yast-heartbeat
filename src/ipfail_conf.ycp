@@ -321,7 +321,7 @@ any ConfigurePingGroupDialog () {
 	    boolean ipok = true;
 	    foreach(string s, (list<string>)ip, { if (!IP::Check4(s)) ipok = false; });
 	    if (!ipok) {
-		Report::Error(_("Bad list of IP adresses."));
+		Report::Error(_("Bad list of IP addresses."));
 		continue;
 	    }
 	    
@@ -343,7 +343,7 @@ any ConfigurePingGroupDialog () {
 	    boolean ipok = true;
 	    foreach(string s, (list<string>)ip, { if (!IP::Check4(s)) ipok = false; });
 	    if (!ipok) {
-		Report::Error(_("Bad list of IP adresses."));
+		Report::Error(_("Bad list of IP addresses."));
 		continue;
 	    }
 

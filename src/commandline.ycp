@@ -129,7 +129,7 @@
 
 		options =  filter(string optn, options, {return optn != nil && optn != "";});
 
-		CommandLine::Print(sformat(_("Multicast device: %1, adress: %2, UDP: %3, TTL: %4"),
+		CommandLine::Print(sformat(_("Multicast device: %1, address: %2, UDP: %3, TTL: %4"),
 		    options[0]:"", options[1]:"", options[2]:"", options[3]:""));
 	    }
 	);

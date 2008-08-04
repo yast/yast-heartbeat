@@ -78,7 +78,7 @@ map cmdline_description = $[
         ],
 	"type" : $[
             // translators: command line help text for the 'play' option
-            "help"      : _("Communication mode, can be 'bcast' for broadcast or 'mcast' for multicat."),
+            "help"      : _("Communication mode, can be 'bcast' for broadcast or 'mcast' for multicast."),
 	    "type"      : "string"
         ],
 	"device" : $[
@@ -88,7 +88,7 @@ map cmdline_description = $[
         ],
 	"address" : $[
             // translators: command line help text for the 'play' option
-            "help"      : _("IP address of the multicats group (224.0.0.0 - 239.255.255.255)."),
+            "help"      : _("IP address of the multicast group (224.0.0.0 - 239.255.255.255)."),
 	    "type"      : "string"
         ],
 	"ttl" : $[

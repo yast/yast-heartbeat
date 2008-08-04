@@ -74,7 +74,7 @@ run the command line utility ha_propagate.")))
 	UI::ChangeWidget (`id ("stop_now"), `Enabled, status==0);
 
         UI::ReplaceWidget (`id ("status_rp"),
-	    `Label (status==0 ? _("Hearbeat server is running.") : _("Heartbeat server is not running.")));
+	    `Label (status==0 ? _("Heartbeat server is running.") : _("Heartbeat server is not running.")));
 
         ret = UI::UserInput();
 
