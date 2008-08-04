@@ -83,10 +83,10 @@ any my_SetContents(string conf, term contents)
 	UI::ChangeWidget(`id(`back), `Enabled, conf != "node_conf");
         if (conf == "startup_conf") {
 	    UI::WizardCommand(`SetNextButtonLabel( Label::FinishButton() ) );
-	    Wizard::ReplaceNextButton(`PushButton(`id(`next), `opt(`key_F10), Label::FinishButton()));
+	    Wizard::SetNextButton(`PushButton(`id(`next), `opt(`key_F10), Label::FinishButton()));
 	} else {
     	    UI::WizardCommand(`SetNextButtonLabel( Label::NextButton() ) );
-	    Wizard::ReplaceNextButton(`PushButton(`id(`next), `opt(`key_F10), Label::NextButton()));
+	    Wizard::SetNextButton(`PushButton(`id(`next), `opt(`key_F10), Label::NextButton()));
 	}
     }
 }

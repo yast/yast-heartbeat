@@ -50,11 +50,11 @@ any TabSequence() {
     // Buttons redefinition
 
 
-    Wizard::ReplaceNextButton(`PushButton(`id(`next), `opt(`key_F10), Label::FinishButton()));
+    Wizard::SetNextButton(`PushButton(`id(`next), `opt(`key_F10), Label::FinishButton()));
 
     if (UI::WidgetExists(`id(`wizardTree))) {
-	Wizard::ReplaceBackButton(`PushButton(`id(`help), `opt(`key_F1), Label::HelpButton()));
-	Wizard::ReplaceAbortButton(`PushButton(`id(`abort), `opt(`key_F9), Label::CancelButton()));
+	Wizard::SetBackButton(`PushButton(`id(`help), `opt(`key_F1), Label::HelpButton()));
+	Wizard::SetAbortButton(`PushButton(`id(`abort), `opt(`key_F9), Label::CancelButton()));
     } else {
 	UI::WizardCommand(`SetNextButtonLabel( Label::FinishButton() ) );
 	UI::WizardCommand(`SetAbortButtonLabel( Label::CancelButton() ) );
