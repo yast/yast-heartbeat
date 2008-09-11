@@ -39,7 +39,7 @@ map cmdline_description = $[
 	"node"	: $[
             "handler"   : NodeHandler,
             // translators: command line help text for add action
-            "help"      : _("Configure list of the servers for the cluster"),
+            "help"      : _("Configure a list of the servers for the cluster"),
 	],
 	"medium"	: $[
             "handler"   : MediumHandler,
