@@ -69,12 +69,15 @@ run the command line utility ha_propagate.")))
     while(true) {
     
 	integer status =(integer)Service::Status("heartbeat");
-	
-	UI::ChangeWidget (`id ("start_now"), `Enabled, status!=0);
-	UI::ChangeWidget (`id ("stop_now"), `Enabled, status==0);
 
-        UI::ReplaceWidget (`id ("status_rp"),
+	if (!Heartbeat::firstrun)
+	{
+	    UI::ChangeWidget (`id ("start_now"), `Enabled, status!=0);
+	    UI::ChangeWidget (`id ("stop_now"), `Enabled, status==0);
+
+            UI::ReplaceWidget (`id ("status_rp"),
 	    `Label (status==0 ? _("Heartbeat server is running.") : _("Heartbeat server is not running.")));
+	}
 
         ret = UI::UserInput();
 
