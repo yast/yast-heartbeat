@@ -42,22 +42,12 @@ any ConfigureStartUpDialog () {
 				`PushButton ( `id ( "start_now" ), `opt( `hstretch ), _("Start Heartbeat Server Now") ),
 				`PushButton ( `id ( "stop_now" ),  `opt( `hstretch ), _("Stop Heartbeat Server Now") )
 			    ))));
-
-    term Tpropagate = `Frame ( _("Propagate Configuration"),
-		    `Left (
-			`HSquash (
-			    `VBox (
-				`VBox (
-				    `Left( `Label (_("To propagate this configuration to the rest of the nodes,
-run the command line utility ha_propagate.")))
-				)
-			    ))));
     
     term contents = `Empty();
     if (Heartbeat::firstrun) {
-	contents = `VBox (Tbooting, `VSpacing(1), Tpropagate, `VStretch() );
+	contents = `VBox (Tbooting, `VStretch() );
     } else {
-	contents = `VBox (Tbooting, `VSpacing(1), Tonoff, `VSpacing(1), Tpropagate, `VStretch() );
+	contents = `VBox (Tbooting, `VSpacing(1), Tonoff, `VStretch() );
     }
 
 
@@ -85,10 +75,10 @@ run the command line utility ha_propagate.")))
 	    if (ReallyAbort()) return ret;
 	    else continue;
 	}
-
+ 
 	if (ret == `next || ret == `back) break;
 	
-	if (ret == "start_now") {
+	if (ret == "start_now")  {
 	    if (! Service::Start("heartbeat")) {
 		Report::Error ( Service::Error());
 	    }
@@ -123,6 +113,8 @@ run the command line utility ha_propagate.")))
 	Heartbeat::start_daemon_modified = true;
 	Heartbeat::start_daemon = !boot;
     }
+    boolean prop = (boolean) UI::QueryWidget(`id("ha_propagate"), `Value);
+    Heartbeat::propagate = prop;
 
     return ret;
 }
