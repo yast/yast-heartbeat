@@ -113,8 +113,6 @@ any ConfigureStartUpDialog () {
 	Heartbeat::start_daemon_modified = true;
 	Heartbeat::start_daemon = !boot;
     }
-    boolean prop = (boolean) UI::QueryWidget(`id("ha_propagate"), `Value);
-    Heartbeat::propagate = prop;
 
     return ret;
 }
