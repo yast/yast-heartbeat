@@ -9,7 +9,7 @@ BuildArchitectures:	noarch
 Summary:	YaST2 - High Availability Configuration
 
 %description
--
+YaST-Module to configure heartbeat
 
 @PREP@
 
