@@ -6,7 +6,7 @@ Requires:	yast2
 
 BuildArchitectures:	noarch
 
-Summary:	Configuration of HA (heartbeat)
+Summary:	YaST2 - High Availability Configuration
 
 %description
 -
