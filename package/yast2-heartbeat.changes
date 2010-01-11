@@ -94,6 +94,7 @@ Wed Apr 19 11:10:58 CEST 2006 - lslezak@suse.cz
 - display redundancy warning message at proper time (#157296) 
 - 2.13.7
       
+-------------------------------------------------------------------
 Wed Apr 19 11:10:58 CEST 2006 - lslezak@suse.cz
 
 - fixed Edit button behaviour in the Media Config dialog (#156809)
