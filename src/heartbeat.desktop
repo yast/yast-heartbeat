@@ -17,7 +17,7 @@ X-SuSE-YaST-SortKey=
 X-SuSE-YaST-AutoInstResource=heartbeat
 
 Icon=yast-heartbeat
-Exec=/sbin/yast2 heartbeat 
+Exec=/usr/bin/xdg-su -c '/sbin/yast2 heartbeat'
 
 Name=High Availability
 GenericName=Configure high availability (heartbeat)
