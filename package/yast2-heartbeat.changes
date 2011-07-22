@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jul 22 15:25:31 CEST 2011 - locilka@suse.cz
+
+- Removed obsoleted X-KDE-SubstituteUID from desktop file
+  (bnc#540627)
+
+-------------------------------------------------------------------
 Wed Sep 17 16:34:45 CEST 2008 - kmachalkova@suse.cz
 
 - Do not try to update non-existing widgets when we are in 
