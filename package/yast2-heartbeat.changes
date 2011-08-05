@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Aug  5 12:32:09 CEST 2011 - tgoettlicher@suse.de
+
+- fixed .desktop file (bnc #681249)
+
+-------------------------------------------------------------------
 Fri Jul 22 15:25:31 CEST 2011 - locilka@suse.cz
 
 - Removed obsoleted X-KDE-SubstituteUID from desktop file
