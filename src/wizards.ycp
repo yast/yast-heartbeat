@@ -46,6 +46,7 @@ any TabSequence() {
     );
     
     Wizard::CreateTree(tree, "");
+    Wizard::SetDesktopTitleAndIcon ("heartbeat");
 
     // Buttons redefinition
 
@@ -126,6 +127,7 @@ any HeartbeatSequence() {
     ];
 
     Wizard::CreateDialog();
+    Wizard::SetDesktopTitleAndIcon ("heartbeat");
 
     any ret = Sequencer::Run(aliases, sequence);
 

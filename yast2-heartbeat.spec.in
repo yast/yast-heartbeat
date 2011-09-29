@@ -4,7 +4,7 @@
 Group:	System/YaST
 License: GPL v2 or later
 BuildRequires:	perl-XML-Writer update-desktop-files yast2 yast2-devtools yast2-testsuite
-Requires:	yast2
+Requires:	yast2 >= 2.21.22
 
 BuildArchitectures:	noarch
 
