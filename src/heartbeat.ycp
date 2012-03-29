@@ -39,7 +39,7 @@ map cmdline_description = $[
 	"node"	: $[
             "handler"   : NodeHandler,
             // translators: command line help text for add action
-            "help"      : _("Configure a list of the servers for the cluster"),
+            "help"      : _("Configure a list of servers for the cluster."),
 	],
 	"medium"	: $[
             "handler"   : MediumHandler,
@@ -78,7 +78,7 @@ map cmdline_description = $[
         ],
 	"type" : $[
             // translators: command line help text for the 'play' option
-            "help"      : _("Communication mode, can be 'bcast' for broadcast or 'mcast' for multicast."),
+            "help"      : _("Set the communication mode to 'bcast' for broadcast or 'mcast' for multicast."),
 	    "type"      : "string"
         ],
 	"device" : $[
@@ -103,7 +103,7 @@ map cmdline_description = $[
         ],
 	"method" : $[
             // translators: command line help text for the 'play' option
-            "help"      : _("Authentication method, can be 'crc' (no security), 'sha1' or 'md5'."),
+            "help"      : _("Set authentication method to 'crc' (no security), 'sha1' or 'md5'."),
 	    "type"      : "string"
         ],
 	"key" : $[

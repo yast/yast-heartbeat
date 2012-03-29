@@ -157,9 +157,10 @@ must start Heartbeat manually each time this cluster server
 is booted. You can start the Heartbeat server manually using
 the <tt>/etc/init.d/heartbeat start</tt> command.</p>
 <p>To propagate the configuration to all nodes of the cluster and 
-to enable heartbeat service on them, run the commandline utility 
+to enable heartbeat service on them, run the command line utility 
 <tt>/usr/lib/heartbeat/ha_propagate</tt> on this node after the 
-configuration is saved.</p>"),
+configuration is saved.</p>
+"),
 
     "timeouts_conf": _("<p>Heartbeat uses a variety of timers to tune and configure its behavior.
 All timers are specified in seconds.</p>
