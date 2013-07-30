@@ -8,6 +8,8 @@ Requires:	yast2 >= 2.21.22
 
 BuildArchitectures:	noarch
 
+Requires:       yast2-ruby-bindings >= 1.0.0
+
 Summary:	YaST2 - High Availability Configuration
 
 %description
@@ -25,8 +27,7 @@ YaST-Module to configure heartbeat
 %defattr(-,root,root)
 %dir @yncludedir@/heartbeat
 @yncludedir@/heartbeat/*
-@clientdir@/heartbeat.ycp
-# @clientdir@/heartbeat_*.ycp
+@clientdir@/heartbeat.rb
 @moduledir@/Heartbeat.*
 @desktopdir@/heartbeat.desktop
 @scrconfdir@/*.scr
